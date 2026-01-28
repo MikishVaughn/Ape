@@ -784,3 +784,36 @@ textarea[aria-invalid="true"] {
 }
 
 /* #endregion ADA Compliance Styles */
+
+
+/* #region Top Button */
+
+#top-button {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 30px;
+    z-index: 99;
+    font-size: 18px;
+    border: none;
+    outline: none;
+    background-color: transparent;
+    color: white;
+    cursor: pointer;
+    padding: 8px 24px;
+    border-radius: 4px;
+}
+
+    #top-button:hover {
+        background-color: #4A4B4C; /* bg-gray-dark */
+    }
+
+    #top-button:active {
+        background-color: transparent;
+    }
+
+.siteNameBig, .siteNameSmall, nav-link, .nav-text > a {
+    padding-left: 120px;
+}
+
+/* #endregion Top Button */
