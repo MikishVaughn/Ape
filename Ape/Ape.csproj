@@ -57,6 +57,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="ProtectedFiles\01-Getting-Started.pdf" />
+    <None Remove="ProtectedFiles\02-Administrator-Guide.pdf" />
+    <None Remove="ProtectedFiles\03-Email-Configuration-Guide.pdf" />
+    <None Remove="ProtectedFiles\04-Document-Gallery-Guide.pdf" />
+    <None Remove="ProtectedFiles\05-Security-Guide.pdf" />
+    <None Remove="ProtectedFiles\06-Deployment-Guide.pdf" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="ProtectedFiles\holder.txt">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
