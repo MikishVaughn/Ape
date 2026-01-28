@@ -18,8 +18,14 @@
             </button>
             <div class="navbar-collapse collapse" id="navbarContent">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link text-light" asp-area="" asp-controller="Info" asp-action="Index">Home</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Welcome
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" asp-area="" asp-controller="Info" asp-action="Index">Home</a></li>
+                            <li><a class="dropdown-item" asp-controller="Links" asp-action="MoreLinks">More Links</a></li>
+                        </ul>
                     </li>
                     
                     <!-- Manage Dropdown (Admin Only) -->
@@ -100,7 +106,6 @@
                                 <li><hr class="dropdown-divider" /></li>
                                 <li><a class="dropdown-item" asp-controller="Document" asp-action="Browse">Document Library</a></li>
                                 <li><a class="dropdown-item" asp-controller="Gallery" asp-action="Browse">Image Gallery</a></li>
-                                <li><a class="dropdown-item" asp-controller="Links" asp-action="MoreLinks">More Links</a></li>
                             </ul>
                         </li>
                     }

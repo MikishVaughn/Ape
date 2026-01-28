@@ -4,6 +4,19 @@
     string siteName = await ConfigService.GetCredentialAsync("SITE_NAME") ?? "Ape";
 }
 
+<style>
+    .logo {
+        image-rendering: pixelated;
+        max-height: 200px;  /* Large screens */
+    }
+
+    @@media (max-width: 576px) {
+        .logo {
+            max-height: 120px;  /* Phone screens */
+        }
+    }
+</style>
+
 <!-- Hero Section -->
 <div class="container mt-4 mb-5">
 
@@ -12,11 +25,11 @@
     <div class="row align-items-center">
 
         <div class="col-12 col-md-4 text-lg-end text-center mb-4 mb-md-0">
-            <img src="~/images/site/Logo.png" alt="Ape mascot" class="img-fluid" style="max-height: 200px;" />
+            <img src="~/images/site/Logo.png" alt="Ape mascot" class="img-fluid logo" />
         </div>
 
         <div class="col-12 col-md-8" style="max-width: 620px;">
-            <img style="max-width: 600px;" src="~/images/site/mvc.png" />
+            <img class="w-100" src="~/images/site/mvc.png" />
             <p class="lead text-secondary mb-2">
                 An <b>ASP.NET Core MVC</b> membership platform with role-based access,
                 secure document management, and admin-configurable settings.
@@ -35,7 +48,7 @@
 </div>
 
 <!-- Features Section -->
-<div class="rounded-3 bg-dark py-5 mx-auto" style="max-width: 1000px;">
+<div class="rounded-3 bg-dark py-2 mx-auto" style="max-width: 1000px;">
     <div class="container">
         <h2 class="text-white text-center mb-2">Platform Features</h2>
         <p class="text-center text-secondary mb-4">Built-in tools for managing members, content, and communications</p>
@@ -51,7 +64,7 @@
                         </div>
                         <h5 class="card-title">Identity &amp; Security</h5>
                         <p class="card-text text-secondary">
-                            ASP.NET Identity with Entity Framework, email verification, and secure account management.
+                            ASP.NET Identity with Entity Framework, email verification, and secure account management including two factor authorization.
                         </p>
                     </div>
                 </div>
@@ -81,7 +94,7 @@
                         </div>
                         <h5 class="card-title">Email System</h5>
                         <p class="card-text text-secondary">
-                            Azure Communication Services with SMTP fallback. Configured through the System Credentials page.
+                            Azure Communication Services with SMTP fallback. Configured through the System Credentials page for outbound email needs.
                         </p>
                     </div>
                 </div>
@@ -96,7 +109,7 @@
                         </div>
                         <h5 class="card-title">Contact Form</h5>
                         <p class="card-text text-secondary">
-                            Public contact form with admin-configurable recipient addresses and email logging.
+                            Public contact form with admin-configurable recipient addresses, and email logging with triple-layer SPAM protection (honeypot fields, JavaScript token, timing validation).
                         </p>
                     </div>
                 </div>

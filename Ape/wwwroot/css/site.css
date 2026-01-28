@@ -817,3 +817,13 @@ textarea[aria-invalid="true"] {
 }
 
 /* #endregion Top Button */
+
+
+/* #region Hide Flashing Cursor */
+
+/* Hide flashing cursor on non-input elements */
+.container, .card, p, h1, h2, h3, h4, h5, h6, div, span {
+    caret-color: transparent;
+}
+
+/* #endregion Hide Flashing Cursor */

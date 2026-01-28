@@ -10,8 +10,8 @@ namespace Ape.Controllers
     {
         private readonly ApplicationDbContext _context = context;
 
-        // GET: /Links/MoreLinks - View showing all categories and links in columns
-        [Authorize(Roles = "Admin,Member")]
+        // GET: /Links/MoreLinks - View showing all categories and links in columns (Public access)
+        [AllowAnonymous]
         public async Task<IActionResult> MoreLinks()
         {
             try
@@ -290,6 +290,40 @@ namespace Ape.Controllers
 
             TempData["SuccessMessage"] = $"Link '{link.LinkName}' deleted successfully.";
             return RedirectToAction(nameof(ManageLinks), new { categoryId });
+        }
+
+        // POST: /Links/UpdateLink - Admin only
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateLink(int linkId, string linkName, string linkUrl)
+        {
+            var link = await _context.CategoryLinks.FirstOrDefaultAsync(l => l.LinkID == linkId);
+
+            if (link == null)
+            {
+                return NotFound();
+            }
+
+            if (string.IsNullOrWhiteSpace(linkName) || string.IsNullOrWhiteSpace(linkUrl))
+            {
+                TempData["ErrorMessage"] = "Both link name and URL are required.";
+                return RedirectToAction(nameof(ManageLinks), new { categoryId = link.CategoryID });
+            }
+
+            // Validate URL format
+            if (!Uri.TryCreate(linkUrl, UriKind.Absolute, out _))
+            {
+                TempData["ErrorMessage"] = "Please enter a valid URL.";
+                return RedirectToAction(nameof(ManageLinks), new { categoryId = link.CategoryID });
+            }
+
+            link.LinkName = linkName.Trim();
+            link.LinkUrl = linkUrl.Trim();
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = $"Link '{linkName}' updated successfully.";
+            return RedirectToAction(nameof(ManageLinks), new { categoryId = link.CategoryID });
         }
 
         // POST: /Links/UpdateCategoriesSortOrder - Batch update for drag-and-drop

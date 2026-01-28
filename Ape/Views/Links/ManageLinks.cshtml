@@ -158,6 +158,12 @@
                                                     </a>
                                                 </td>
                                                 <td>
+                                                    <!-- Edit Button -->
+                                                    <button type="button" class="btn btn-sm btn-outline-primary me-1"
+                                                            onclick="editLink(@link.LinkID, '@Html.Raw(Html.Encode(link.LinkName))', '@Html.Raw(Html.Encode(link.LinkUrl))')"
+                                                            title="Edit Link">
+                                                        Edit
+                                                    </button>
                                                     <!-- Delete Button -->
                                                     <button type="button" class="btn btn-sm btn-outline-danger"
                                                             onclick="confirmDeleteLink(@link.LinkID, '@Html.Raw(Html.Encode(link.LinkName))')"
@@ -188,6 +194,41 @@
                     <p class="mb-0">Choose a category from the dropdown above to view and manage its links.</p>
                 </div>
             }
+        </div>
+    </div>
+</div>
+
+<!-- Edit Link Modal -->
+<div class="modal fade" id="editLinkModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Link</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editLinkForm" method="post" asp-action="UpdateLink">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="editLinkId" name="linkId">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="editLinkName" class="form-label">Link Name</label>
+                        <input type="text" class="form-control" id="editLinkName" name="linkName"
+                               required maxlength="255">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editLinkUrl" class="form-label">Link URL</label>
+                        <input type="url" class="form-control" id="editLinkUrl" name="linkUrl"
+                               required maxlength="500">
+                        <div class="form-text">Must start with http:// or https://</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -225,6 +266,13 @@ function confirmDeleteLink(linkId, linkName) {
     document.getElementById('linkIdToDelete').value = linkId;
     document.getElementById('linkNameToDelete').textContent = linkName;
     new bootstrap.Modal(document.getElementById('deleteLinkModal')).show();
+}
+
+function editLink(linkId, linkName, linkUrl) {
+    document.getElementById('editLinkId').value = linkId;
+    document.getElementById('editLinkName').value = linkName;
+    document.getElementById('editLinkUrl').value = linkUrl;
+    new bootstrap.Modal(document.getElementById('editLinkModal')).show();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
