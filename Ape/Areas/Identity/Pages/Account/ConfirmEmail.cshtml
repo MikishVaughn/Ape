@@ -1,0 +1,25 @@
+﻿@page
+@model ConfirmEmailModel
+@{
+    ViewData["Title"] = "Email Confirmed";
+}
+
+<head>
+    <title>@ViewData["Title"]</title>
+</head>
+
+<div class="d-flex justify-content-center align-items-center container" style="min-height: 80vh;">
+    <div class="card rounded p-0 shadow" style="max-width: 400px; width: 90%;">
+        <div class="card-body rounded-2">
+            <h3 class="mb-4">
+                ✅ @ViewData["Title"]
+            </h3>           
+            <div class="mt-3 text-center">
+                <div class="fs-3 mb-4 text-black">
+                    You ready to Log in!
+                </div>
+                <a href="/Identity/Account/Login" class="btn btn-sm btn-success rounded-2 shadow">🔒 Login</a>
+            </div>
+        </div>
+    </div>
+</div>

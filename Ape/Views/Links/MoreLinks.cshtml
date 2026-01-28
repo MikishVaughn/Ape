@@ -1,0 +1,239 @@
+@model List<Ape.Models.LinkCategory>
+@{
+    ViewData["Title"] = "More Links";
+}
+
+<div class="container-fluid mt-4 mb-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Page Header -->
+            <div class="mb-4 text-center">
+                <h2>More Links</h2>
+                <p>Useful links organized by category</p>
+
+                @if (User.IsInRole("Admin"))
+                {
+                    <div class="mt-3 text-center">
+                        <a href="@Url.Action("ManageCategories", "Links")" class="btn btn-primary btn-sm mb-2 mx-1">
+                            <i class="bi bi-gear"></i> Manage Categories
+                        </a>
+                        <a href="@Url.Action("ManageLinks", "Links")" class="btn btn-secondary btn-sm mb-2 mx-1">
+                            <i class="bi bi-link-45deg"></i> Manage Links
+                        </a>
+                    </div>
+                }
+            </div>
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (ViewBag.DatabaseError != null)
+            {
+                <div class="alert alert-warning">
+                    <h4><i class="bi bi-exclamation-triangle"></i> Database Setup Required</h4>
+                    <p><strong>@ViewBag.DatabaseError</strong></p>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <p>Please run the EF database migration to create the required tables.</p>
+                    }
+                    <details>
+                        <summary>Technical Details</summary>
+                        <pre>@ViewBag.ErrorDetails</pre>
+                    </details>
+                </div>
+            }
+
+            @if (Model.Any())
+            {
+                <!-- Links Display in Column-Based Layout -->
+                <div class="masonry-container">
+                    @{
+                        var sortedCategories = Model.OrderBy(c => c.SortOrder).ToList();
+                    }
+
+                    <!-- Desktop/Tablet: Column-based layout -->
+                    <div class="masonry-columns-desktop">
+                        @{
+                            var columns = new List<List<Ape.Models.LinkCategory>> { new(), new(), new() };
+
+                            for (int i = 0; i < sortedCategories.Count; i++)
+                            {
+                                var category = sortedCategories[i];
+                                var columnIndex = i % 3;
+
+                                if (category.CategoryLinks.Count > 10)
+                                {
+                                    var columnSizes = columns.Select((col, idx) => new { Index = idx, TotalLinks = col.Sum(c => Math.Max(1, c.CategoryLinks.Count)) }).OrderBy(x => x.TotalLinks).First();
+                                    columnIndex = columnSizes.Index;
+                                }
+
+                                columns[columnIndex].Add(category);
+                            }
+                        }
+
+                        @for (int colIndex = 0; colIndex < columns.Count; colIndex++)
+                        {
+                            <div class="masonry-column">
+                                @foreach (var category in columns[colIndex])
+                                {
+                                    <div class="masonry-item">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h5 class="mb-0">
+                                                    <i class="bi bi-folder2"></i> @category.CategoryName
+                                                    @if (category.IsAdminOnly)
+                                                    {
+                                                        <small class="badge bg-warning text-dark ms-2">Admin Only</small>
+                                                    }
+                                                </h5>
+                                            </div>
+                                            <div class="card-body">
+                                                @if (category.CategoryLinks.Any())
+                                                {
+                                                    <ul class="list-unstyled mb-0">
+                                                        @foreach (var link in category.CategoryLinks)
+                                                        {
+                                                            <li>
+                                                                <a href="@link.LinkUrl"
+                                                                   target="_blank"
+                                                                   rel="noopener noreferrer"
+                                                                   class="link-item d-flex align-items-center text-decoration-none">
+                                                                    <i class="bi bi-link-45deg text-primary me-2"></i>
+                                                                    <span>@link.LinkName</span>
+                                                                </a>
+                                                            </li>
+                                                        }
+                                                    </ul>
+                                                }
+                                                else
+                                                {
+                                                    <p class="mb-0">
+                                                        <i class="bi bi-info-circle"></i> No links in this category yet.
+                                                    </p>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Mobile: Linear sort order layout -->
+                    <div class="masonry-mobile-linear">
+                        @foreach (var category in sortedCategories)
+                        {
+                            <div class="masonry-item">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">
+                                            <i class="bi bi-folder2"></i> @category.CategoryName
+                                            @if (category.IsAdminOnly)
+                                            {
+                                                <small class="badge bg-warning text-dark ms-2">Admin Only</small>
+                                            }
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        @if (category.CategoryLinks.Any())
+                                        {
+                                            <ul class="list-unstyled mb-0">
+                                                @foreach (var link in category.CategoryLinks)
+                                                {
+                                                    <li>
+                                                        <a href="@link.LinkUrl"
+                                                           target="_blank"
+                                                           rel="noopener noreferrer"
+                                                           class="link-item d-flex align-items-center text-decoration-none">
+                                                            <i class="bi bi-link-45deg text-primary me-2"></i>
+                                                            <span>@link.LinkName</span>
+                                                        </a>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        }
+                                        else
+                                        {
+                                            <p class="mb-0">
+                                                <i class="bi bi-info-circle"></i> No links in this category yet.
+                                            </p>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle"></i> No Link Categories Found</h4>
+                    <p class="mb-0">
+                        No link categories have been created yet.
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <text>Use the "Manage Categories" button above to create your first category.</text>
+                        }
+                        else
+                        {
+                            <text>Please contact an administrator to set up link categories.</text>
+                        }
+                    </p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+/* Masonry layout */
+.masonry-container {
+    width: 100%;
+}
+.masonry-columns-desktop {
+    display: none;
+}
+.masonry-mobile-linear {
+    display: block;
+}
+.masonry-column {
+    flex: 1;
+    min-width: 0;
+    padding: 0 8px;
+}
+.masonry-item {
+    margin-bottom: 16px;
+}
+.link-item {
+    padding: 6px 4px;
+    border-radius: 4px;
+    transition: background-color 0.15s;
+}
+.link-item:hover {
+    background-color: rgba(0,0,0,0.04);
+}
+
+@@media (min-width: 768px) {
+    .masonry-columns-desktop {
+        display: flex;
+        gap: 0;
+    }
+    .masonry-mobile-linear {
+        display: none;
+    }
+}
+</style>

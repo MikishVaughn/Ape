@@ -1,0 +1,134 @@
+@model dynamic
+@{
+    ViewData["Title"] = "Credential Audit History";
+    var credential = Model.Credential as Ape.Models.ViewModels.CredentialViewModel;
+    var auditLogs = Model.AuditLogs as List<Ape.Models.ViewModels.CredentialAuditViewModel>;
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="bi bi-clock-history"></i> Audit History
+                    </h2>
+                    <p class="text-muted mb-0">
+                        <strong>@credential?.CredentialName</strong>
+                        (<code>@credential?.CredentialKey</code>)
+                    </p>
+                </div>
+                <div>
+                    <a href="@Url.Action("Index")" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Credentials
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                Access & Modification Log
+                <span class="badge bg-secondary ms-2">@(auditLogs?.Count ?? 0) records (last 50)</span>
+            </h5>
+        </div>
+        <div class="card-body">
+            @if (auditLogs?.Any() != true)
+            {
+                <p class="text-muted mb-0">No audit history available for this credential.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date/Time</th>
+                                <th>Action</th>
+                                <th>User</th>
+                                <th>IP Address</th>
+                                <th>Details</th>
+                                <th>Result</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var log in auditLogs)
+                            {
+                                <tr>
+                                    <td>
+                                        <small>@log.ActionDate.ToLocalTime().ToString("MM/dd/yyyy h:mm:ss tt")</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge @GetActionBadgeClass(log.Action)">
+                                            @log.Action
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small>@(log.ActionBy ?? "System")</small>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">@(log.IPAddress ?? "-")</small>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(log.ActionDetails))
+                                        {
+                                            <small class="text-muted">@log.ActionDetails</small>
+                                        }
+                                        else if (!string.IsNullOrEmpty(log.ErrorMessage))
+                                        {
+                                            <small class="text-danger">@log.ErrorMessage</small>
+                                        }
+                                        else
+                                        {
+                                            <small class="text-muted">-</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (log.Success.HasValue)
+                                        {
+                                            if (log.Success.Value)
+                                            {
+                                                <i class="bi bi-check-circle-fill text-info" title="Success"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-x-circle-fill text-danger" title="Failed"></i>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="alert alert-info mt-3 mb-0">
+                    <i class="bi bi-info-circle-fill"></i> <strong>Note:</strong>
+                    Audit logs are retained for compliance and security monitoring.
+                    Only the last 50 entries are displayed here. Contact system administrator for complete history.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetActionBadgeClass(string action)
+    {
+        return action switch
+        {
+            "Created" => "bg-success",
+            "Updated" => "bg-primary",
+            "Deleted" => "bg-danger",
+            "Viewed" => "bg-info",
+            "Tested" => "bg-warning",
+            _ => "bg-secondary"
+        };
+    }
+}

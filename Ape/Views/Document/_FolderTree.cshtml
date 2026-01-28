@@ -1,0 +1,67 @@
+@model List<Ape.Models.ViewModels.FolderTreeNode>
+@using Ape.Models
+
+@if (Model == null || !Model.Any())
+{
+    <div class="text-muted small p-2">No folders found</div>
+}
+else
+{
+    <ul class="folder-tree list-unstyled mb-0">
+        @foreach (var node in Model)
+        {
+            @await Html.PartialAsync("_FolderTreeNode", node)
+        }
+    </ul>
+}
+
+<style>
+    .folder-tree {
+        font-size: 0.9rem;
+    }
+    .folder-tree ul {
+        list-style: none;
+        padding-left: 1rem;
+        margin: 0;
+    }
+    .folder-tree-item {
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        margin: 1px 0;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    .folder-tree-item:hover {
+        background-color: #e9ecef;
+    }
+    .folder-tree-item.selected {
+        background-color: #cfe2ff;
+        font-weight: 500;
+    }
+    .folder-tree-item a {
+        color: inherit;
+        text-decoration: none;
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .folder-tree-item a:hover {
+        color: #0d6efd;
+    }
+    .folder-toggle {
+        width: 16px;
+        text-align: center;
+        cursor: pointer;
+        user-select: none;
+        font-size: 0.7rem;
+    }
+    .folder-icon {
+        font-size: 0.9rem;
+    }
+    .folder-restricted .folder-icon {
+        color: #ffc107;
+    }
+</style>

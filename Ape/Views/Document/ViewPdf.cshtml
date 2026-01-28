@@ -1,0 +1,182 @@
+@{
+    ViewData["Title"] = "View PDF";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var fileId = (int)ViewData["FileId"]!;
+    var fileName = (string)ViewData["FileName"]!;
+}
+
+<div class="container mt-3 mt-lg-2 mb-0 pt-0 bg-white" style="margin: 10px auto; max-width: 800px;">
+    <div class="row gy-2">
+        <div class="col text-start">
+            <a id="closeButton" href="#" class="text-decoration-none fs-4" title="Close">
+                <i class="bi bi-x-circle"></i>
+            </a>
+        </div>
+        <div class="col text-end mb-2">
+            <a id="downloadButton" href="#" class="text-decoration-none fs-3" title="Download Content">
+                <i class="bi bi-paperclip"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Spinner -->
+<div id="pdf-loading-spinner" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-3 text-muted">Loading document, please wait...</p>
+</div>
+
+<div id="pdf-viewer-container" style="display:none; margin: 0 auto; max-width: 800px;"></div>
+
+<!-- Confirm Action Modal -->
+<div class="modal fade" id="confirmActionModal" tabindex="-1" aria-labelledby="confirmActionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmActionModalLabel">Confirm Action</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="confirmActionBody">
+                Are you sure?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmActionBtn" onclick="">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        // Set the worker source for PDF.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        // Confirm modal
+        let confirmCallback = null;
+
+        function showConfirmModal(message, callback, options = {}) {
+            const modal = document.getElementById('confirmActionModal');
+            document.getElementById('confirmActionBody').innerHTML = message;
+            document.getElementById('confirmActionModalLabel').textContent = options.title || 'Confirm Action';
+
+            const confirmBtn = document.getElementById('confirmActionBtn');
+            confirmBtn.textContent = options.confirmText || 'Confirm';
+            confirmBtn.className = 'btn ' + (options.dangerous === false ? 'btn-primary' : 'btn-danger');
+
+            confirmCallback = callback;
+            confirmBtn.onclick = function () {
+                bootstrap.Modal.getInstance(modal).hide();
+                if (confirmCallback) confirmCallback();
+            };
+
+            new bootstrap.Modal(modal).show();
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var fileId = @fileId;
+            var fileName = '@Html.Raw(fileName.Replace("'", "\\'"))';
+            var url = '@Url.Action("View", "Document")' + '?fileId=' + fileId;
+            var downloadUrl = '@Url.Action("Download", "Document")' + '?fileId=' + fileId;
+            var pdfContainer = document.getElementById('pdf-viewer-container');
+            var loadingSpinner = document.getElementById('pdf-loading-spinner');
+            var closeButton = document.getElementById('closeButton');
+            var downloadButton = document.getElementById('downloadButton');
+
+            pdfjsLib.getDocument(url).promise.then(function (pdfDoc) {
+                // Hide spinner and show container once PDF is loaded
+                loadingSpinner.style.display = 'none';
+                pdfContainer.style.display = 'block';
+
+                var renderPage = function (pageNum) {
+                    pdfDoc.getPage(pageNum).then(function (page) {
+                        var originalViewport = page.getViewport({ scale: 1 });
+                        var renderScale = 4;
+                        var renderViewport = page.getViewport({ scale: renderScale });
+                        var canvas = document.createElement('canvas');
+                        canvas.id = 'pdf-page-' + pageNum;
+                        canvas.style.width = renderViewport.width + "px";
+                        canvas.style.height = renderViewport.height + "px";
+                        canvas.style.marginBottom = '10px';
+                        var context = canvas.getContext('2d');
+                        canvas.height = renderViewport.height;
+                        canvas.width = renderViewport.width;
+                        var renderContext = {
+                            canvasContext: context,
+                            viewport: renderViewport,
+                        };
+
+                        page.render(renderContext).promise.then(function () {
+                            var containerWidth = pdfContainer.offsetWidth;
+                            var displayScale = containerWidth / originalViewport.width;
+                            canvas.style.width = (originalViewport.width * displayScale) + "px";
+                            canvas.style.height = (originalViewport.height * displayScale) + "px";
+                            canvas.style.display = 'block';
+                            canvas.style.marginBottom = '10px';
+                            canvas.style.backgroundColor = 'white';
+                            canvas.style.cursor = 'pointer';
+                            canvas.style.maxWidth = '100%';
+                            canvas.style.maxHeight = '100%';
+                            canvas.style.marginLeft = 'auto';
+                            canvas.style.marginRight = 'auto';
+                            canvas.style.display = 'block';
+                            canvas.style.visibility = 'visible';
+                            pdfContainer.appendChild(canvas);
+
+                            if (pageNum < pdfDoc.numPages) {
+                                renderPage(pageNum + 1);
+                            }
+                        });
+                    });
+                };
+                renderPage(1);
+
+                // Close button - go back to previous page
+                closeButton.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    history.back();
+                });
+
+                // Download button with confirmation
+                downloadButton.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    showConfirmModal(
+                        'Are you sure you want to download this PDF?',
+                        function () {
+                            var link = document.createElement('a');
+                            link.href = downloadUrl;
+                            link.download = fileName;
+                            link.click();
+                        },
+                        { title: 'Download PDF', confirmText: 'Download', dangerous: false }
+                    );
+                });
+            }).catch(function (error) {
+                // Show error message if PDF fails to load
+                loadingSpinner.innerHTML = '<div class="alert alert-danger" role="alert">' +
+                    '<i class="bi bi-exclamation-triangle-fill me-2"></i>' +
+                    'Unable to load the document. Please try again later.' +
+                    '</div>';
+                console.error('PDF loading error:', error);
+            });
+        });
+
+        // Scroll-to-top button functionality
+        var mybutton = document.getElementById("top-button");
+        if (mybutton) {
+            window.onscroll = function () { scrollFunction() };
+
+            function scrollFunction() {
+                if (document.body.scrollTop > 320 || document.documentElement.scrollTop > 320) {
+                    mybutton.style.display = "flex";
+                } else {
+                    mybutton.style.display = "none";
+                }
+            }
+        }
+    </script>
+}

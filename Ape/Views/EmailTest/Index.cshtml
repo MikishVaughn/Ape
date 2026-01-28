@@ -1,0 +1,135 @@
+@{
+    ViewData["Title"] = "Email Test";
+}
+
+<div class="container mt-4">
+    <div class="row mb-3">
+        <div class="col-12 text-center">
+            <h2>Email Configuration Test</h2>
+            <small class="text-muted">Credentials loaded from encrypted database</small>
+        </div>
+    </div>
+
+    @if (ViewBag.Message != null)
+    {
+        <div class="alert @(ViewBag.Success == true ? "alert-success" : "alert-danger")" role="alert">
+            @ViewBag.Message
+        </div>
+    }
+
+    <div class="card rounded mx-1 my-4">
+        <div class="card-body p-4">
+            <div class="mb-3">
+                <label for="testEmail" class="form-label">Test Email Address:</label>
+                <input type="email" class="form-control" id="testEmail" name="testEmail" required>
+            </div>
+            <div class="text-center mb-3">
+                <form asp-action="TestEmail" method="post" class="d-inline">
+                    <input type="hidden" name="testEmail" id="azureTestEmail">
+                    <button type="submit" class="btn btn-primary me-2">Test Azure (with SMTP fallback)</button>
+                </form>
+                <form asp-action="TestSmtpEmail" method="post" class="d-inline">
+                    <input type="hidden" name="testEmail" id="smtpTestEmail">
+                    <button type="submit" class="btn btn-warning me-2">Test SMTP Only</button>
+                </form>
+                <a asp-controller="Info" asp-action="Index" class="btn btn-secondary">Back to Home</a>
+            </div>
+            <script>
+                document.getElementById('testEmail').addEventListener('input', function() {
+                    document.getElementById('azureTestEmail').value = this.value;
+                    document.getElementById('smtpTestEmail').value = this.value;
+                });
+            </script>
+
+            <div class="mt-4">
+                <h4>Azure Communication Services Configuration:</h4>
+                <ul>
+                    <li>
+                        <strong>Connection String:</strong>
+                        @{
+                            var azureConn = ViewBag.AzureConnectionString as string;
+                            if (!string.IsNullOrEmpty(azureConn))
+                            {
+                                <span class="badge bg-success">SET (from database)</span>
+                                <small class="text-muted">(Length: @azureConn.Length chars)</small>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">NOT SET</span>
+                            }
+                        }
+                    </li>
+                    <li>
+                        <strong>Sender Address:</strong>
+                        @{
+                            var azureSender = ViewBag.AzureSenderAddress as string;
+                            if (!string.IsNullOrEmpty(azureSender))
+                            {
+                                <span class="badge bg-success">SET</span>
+                                <code>@azureSender</code>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark">NOT SET (will use default)</span>
+                            }
+                        }
+                    </li>
+                </ul>
+
+                <h4 class="mt-4">SMTP Configuration:</h4>
+                <ul>
+                    <li>
+                        <strong>SMTP_SERVER:</strong>
+                        @if (!string.IsNullOrEmpty(ViewBag.SmtpServer))
+                        {
+                            <span class="badge bg-success">SET</span>
+                            <code>@ViewBag.SmtpServer</code>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">NOT SET</span>
+                        }
+                    </li>
+                    <li>
+                        <strong>SMTP_PORT:</strong>
+                        <code>@ViewBag.SmtpPort</code>
+                    </li>
+                    <li>
+                        <strong>SMTP_USERNAME:</strong>
+                        @if (!string.IsNullOrEmpty(ViewBag.SmtpUsername))
+                        {
+                            <span class="badge bg-success">SET</span>
+                            <code>@ViewBag.SmtpUsername</code>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">NOT SET</span>
+                        }
+                    </li>
+                    <li>
+                        <strong>SMTP_SSL:</strong>
+                        <code>@ViewBag.SmtpSsl</code>
+                    </li>
+                    <li>
+                        <strong>SMTP_PASSWORD:</strong>
+                        <span class="badge bg-secondary">[Hidden for security]</span>
+                    </li>
+                </ul>
+
+                <div class="alert alert-info mt-3">
+                    <strong>Email Service:</strong> Uses Azure Communication Services with automatic SMTP fallback.<br>
+                    Azure will be tried first. If it fails, SMTP will be used automatically.
+                </div>
+
+                <div class="mt-3">
+                    <a href="/EmailTest/ShowVars" class="btn btn-outline-secondary me-2">
+                        View Detailed Diagnostics
+                    </a>
+                    <a href="/SystemCredentials" class="btn btn-outline-primary">
+                        Manage Credentials
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

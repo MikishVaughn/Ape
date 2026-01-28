@@ -1,0 +1,360 @@
+@model List<Ape.Models.CategoryLink>
+@{
+    ViewData["Title"] = "Manage Category Links";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Page Header -->
+            <div class="mb-4">
+                <!-- 1. Page Title - Centered -->
+                <div class="text-center">
+                    <h2>Manage Category Links</h2>
+                </div>
+
+                <!-- 2. Description - Centered -->
+                <div class="text-center">
+                    <p>Add and organize links within categories</p>
+                </div>
+
+                <!-- 3. Navigation Buttons -->
+                <div class="text-center mt-3">
+                    <div class="btn-group btn-group-sm" role="group">
+                        <a href="@Url.Action("MoreLinks", "Links")" class="btn btn-secondary">
+                            Back to More Links
+                        </a>
+                        <a href="@Url.Action("ManageCategories", "Links")" class="btn btn-primary">
+                            Manage Categories
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <!-- Category Selection -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Select Category</h4>
+                </div>
+                <div class="card-body">
+                    <form method="get" asp-action="ManageLinks" class="row g-3">
+                        <div class="col-md-10">
+                            <label for="categoryId" class="form-label">Choose a category to manage its links</label>
+                            <select class="form-select" id="categoryId" name="categoryId" onchange="this.form.submit()">
+                                <option value="">-- Select a Category --</option>
+                                @foreach (var category in (ViewBag.LinkCategories as List<Ape.Models.LinkCategory>) ?? new List<Ape.Models.LinkCategory>())
+                                {
+                                    var isSelected = ViewBag.SelectedCategoryId != null && ViewBag.SelectedCategoryId.ToString() == category.CategoryID.ToString();
+                                    <option value="@category.CategoryID" selected="@isSelected">
+                                        @category.CategoryName@(category.IsAdminOnly ? " (Admin Only)" : "")
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="submit" class="btn btn-outline-primary d-block w-100">
+                                Load
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            @if (ViewBag.SelectedCategoryId != null)
+            {
+                <!-- Add New Link Form -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4>Add New Link to "@ViewBag.SelectedCategoryName"</h4>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="CreateLink" method="post" class="row g-3">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="categoryId" value="@ViewBag.SelectedCategoryId">
+
+                            <div class="col-md-5">
+                                <label for="linkName" class="form-label">Link Name</label>
+                                <input type="text" class="form-control" id="linkName" name="linkName"
+                                       placeholder="Enter descriptive link name" required maxlength="255">
+                            </div>
+                            <div class="col-md-5">
+                                <label for="linkUrl" class="form-label">Link URL</label>
+                                <input type="url" class="form-control" id="linkUrl" name="linkUrl"
+                                       placeholder="https://example.com" required maxlength="500">
+                                <div class="form-text">Must start with http:// or https://</div>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">&nbsp;</label>
+                                <button type="submit" class="btn btn-success d-block w-100">
+                                    Add Link
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Existing Links -->
+                @if (Model.Any())
+                {
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Links in "@ViewBag.SelectedCategoryName" (@Model.Count)</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table id="linksTable" class="table table-hover">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th width="5%">Order</th>
+                                            <th width="25%">Link Name</th>
+                                            <th width="40%">URL</th>
+                                            <th width="10%">Preview</th>
+                                            <th width="20%">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (int i = 0; i < Model.Count; i++)
+                                        {
+                                            var link = Model[i];
+                                            <tr data-link-id="@link.LinkID">
+                                                <td class="text-center">
+                                                    <div class="d-flex align-items-center justify-content-center">
+                                                        <span class="drag-handle me-2" title="Drag to reorder">
+                                                            &#8801;
+                                                        </span>
+                                                        <span class="badge bg-secondary">@link.SortOrder</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <strong>@link.LinkName</strong>
+                                                </td>
+                                                <td>
+                                                    <code class="text-break small">@link.LinkUrl</code>
+                                                </td>
+                                                <td class="text-center">
+                                                    <a href="@link.LinkUrl"
+                                                       target="_blank"
+                                                       rel="noopener noreferrer"
+                                                       class="btn btn-success btn-sm"
+                                                       title="Open link in new tab">
+                                                        Test
+                                                    </a>
+                                                </td>
+                                                <td>
+                                                    <!-- Delete Button -->
+                                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                                            onclick="confirmDeleteLink(@link.LinkID, '@Html.Raw(Html.Encode(link.LinkName))')"
+                                                            title="Delete Link">
+                                                        Delete
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info">
+                        <h4>No Links Found</h4>
+                        <p class="mb-0">No links have been added to "@ViewBag.SelectedCategoryName" yet. Use the form above to add your first link.</p>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="alert alert-secondary">
+                    <h4>Select a Category</h4>
+                    <p class="mb-0">Choose a category from the dropdown above to view and manage its links.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Delete Link Confirmation Modal -->
+<div class="modal fade" id="deleteLinkModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <strong>Warning:</strong> This action cannot be undone.
+                </div>
+                <p>Are you sure you want to delete the link <strong id="linkNameToDelete"></strong>?</p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteLinkForm" method="post" asp-action="DeleteLink">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="linkIdToDelete" name="linkId">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">
+                        Delete Link
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmDeleteLink(linkId, linkName) {
+    document.getElementById('linkIdToDelete').value = linkId;
+    document.getElementById('linkNameToDelete').textContent = linkName;
+    new bootstrap.Modal(document.getElementById('deleteLinkModal')).show();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const urlInput = document.getElementById('linkUrl');
+    if (urlInput) {
+        urlInput.addEventListener('blur', function() {
+            let url = this.value.trim();
+            if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+                this.value = 'https://' + url;
+            }
+        });
+    }
+
+    const tbody = document.querySelector('#linksTable tbody');
+    if (tbody) {
+        const sortable = Sortable.create(tbody, {
+            handle: '.drag-handle',
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            onEnd: function (evt) {
+                updateLinkSortOrder();
+            }
+        });
+    }
+
+    function updateLinkSortOrder() {
+        const rows = document.querySelectorAll('#linksTable tbody tr');
+        const updates = [];
+
+        rows.forEach((row, index) => {
+            const linkId = row.getAttribute('data-link-id');
+            if (linkId) {
+                updates.push({
+                    linkId: parseInt(linkId),
+                    newSortOrder: index + 1
+                });
+
+                const badge = row.querySelector('.badge.bg-secondary');
+                if (badge) {
+                    badge.textContent = index + 1;
+                }
+            }
+        });
+
+        const formData = new FormData();
+        formData.append('__RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]')?.value || '');
+        updates.forEach(update => {
+            formData.append('linkIds', update.linkId);
+            formData.append('sortOrders', update.newSortOrder);
+        });
+
+        fetch('@Url.Action("UpdateLinksSortOrder", "Links")', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showMessage('Links reordered successfully!', 'success');
+            } else {
+                throw new Error(data.message || 'Failed to update sort order');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showMessage('Error updating sort order. Please refresh and try again.', 'error');
+        });
+    }
+
+    function showMessage(message, type) {
+        const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+        alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alertDiv);
+
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+});
+</script>
+
+<style>
+.table tbody tr:hover {
+    background-color: rgba(0,0,0,0.02);
+}
+.btn-group .btn {
+    border-radius: 0;
+}
+.btn-group .btn:first-child {
+    border-top-left-radius: 0.25rem;
+    border-bottom-left-radius: 0.25rem;
+}
+.btn-group .btn:last-child {
+    border-top-right-radius: 0.25rem;
+    border-bottom-right-radius: 0.25rem;
+}
+code {
+    background-color: #f8f9fa;
+    padding: 2px 6px;
+    border-radius: 3px;
+    word-break: break-all;
+}
+.form-text {
+    font-size: 0.875em;
+}
+.sortable-ghost {
+    opacity: 0.4;
+}
+.sortable-chosen {
+    background-color: #e3f2fd !important;
+}
+.drag-handle {
+    cursor: grab;
+    padding: 0.25rem;
+}
+.drag-handle:active {
+    cursor: grabbing;
+}
+tbody tr:hover .drag-handle {
+    color: #0d6efd !important;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>

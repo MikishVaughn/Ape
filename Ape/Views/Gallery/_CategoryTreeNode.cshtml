@@ -1,0 +1,48 @@
+@model Ape.Models.ViewModels.GalleryCategoryTreeNode
+@using Ape.Models
+
+<li>
+    <div class="category-tree-item @(Model.IsSelected ? "selected" : "") @(Model.AccessLevel > DocumentAccessLevel.Member ? "category-restricted" : "")">
+        @if (Model.Children.Any())
+        {
+            <span class="category-toggle" onclick="toggleCategoryNode(this)">@Html.Raw(Model.IsExpanded ? "&#9660;" : "&#9654;")</span>
+        }
+        else
+        {
+            <span class="category-toggle">&nbsp;</span>
+        }
+        <span class="category-icon">
+            @if (Model.AccessLevel > DocumentAccessLevel.Member)
+            {
+                <span>&#128274;</span>
+            }
+            else
+            {
+                <span>&#128193;</span>
+            }
+        </span>
+        <a href="@Url.Action("Browse", "Gallery", new { categoryId = Model.CategoryId })" title="@Model.Name">
+            @Model.Name
+        </a>
+    </div>
+    @if (Model.Children.Any())
+    {
+        <ul class="@(Model.IsExpanded ? "" : "d-none")">
+            @foreach (var child in Model.Children)
+            {
+                @await Html.PartialAsync("_CategoryTreeNode", child)
+            }
+        </ul>
+    }
+</li>
+
+<script>
+    function toggleCategoryNode(toggleElement) {
+        const listItem = toggleElement.closest('li');
+        const childList = listItem.querySelector(':scope > ul');
+        if (childList) {
+            childList.classList.toggle('d-none');
+            toggleElement.innerHTML = childList.classList.contains('d-none') ? '&#9654;' : '&#9660;';
+        }
+    }
+</script>

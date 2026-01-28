@@ -1,0 +1,157 @@
+@using Ape.Models
+@{
+    ViewData["Title"] = "Contact Form Settings";
+    var contactFormEmails = ViewBag.ContactFormEmails as string ?? "";
+    var allSettings = ViewBag.AllSettings as List<SystemSetting> ?? new List<SystemSetting>();
+}
+
+<!-- Title -->
+<div class="text-center mt-4">
+    <h2>Contact Form Settings</h2>
+</div>
+
+<!-- Description -->
+<div class="text-center">
+    <p>Configure email addresses that receive Contact form submissions</p>
+</div>
+
+<!-- Navigation Buttons -->
+<div class="text-center mb-3">
+    <a asp-controller="Info" asp-action="Index" class="btn btn-secondary me-2">Back to Home</a>
+    <a asp-controller="Info" asp-action="Contact" class="btn btn-info">View Contact Form</a>
+</div>
+
+<!-- Status Messages -->
+@if (TempData["StatusMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mt-4" role="alert">
+        @Html.Raw(TempData["StatusMessage"]?.ToString()?.Replace("\n", "<br />"))
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show mt-4" role="alert">
+        @Html.Raw(TempData["ErrorMessage"]?.ToString()?.Replace("\n", "<br />"))
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+
+            <!-- Contact Form Settings Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Contact Form Email Settings</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">
+                        <strong>Configure email addresses</strong> that will receive Contact form submissions from your website.
+                        When visitors submit the Contact form at <code>/Info/Contact</code>, their messages will be forwarded to these email addresses.
+                    </p>
+                    <p class="mb-3">
+                        <strong>Multiple Recipients:</strong> Enter multiple email addresses separated by commas to ensure important Contact form messages
+                        reach all relevant staff members.
+                    </p>
+
+                    <form method="post" asp-controller="ContactFormSettings" asp-action="UpdateContactEmails">
+                        <div class="mb-3">
+                            <label for="contactEmails" class="form-label fw-bold">Contact Form Email Recipients</label>
+                            <textarea class="form-control" id="contactEmails" name="contactFormEmails" rows="3" required
+                                      placeholder="admin@example.com, manager@example.com, staff@example.com">@contactFormEmails</textarea>
+                            <div class="form-text">
+                                <strong>Tip:</strong> Separate multiple email addresses with commas.
+                                Spaces around commas will be automatically cleaned up.
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                Update Contact Email Settings
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Current Settings Display -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Current Contact Form Settings</h5>
+                </div>
+                <div class="card-body">
+                    @if (allSettings.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Setting Key</th>
+                                        <th>Current Value</th>
+                                        <th>Description</th>
+                                        <th>Last Updated</th>
+                                        <th>Updated By</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var setting in allSettings)
+                                    {
+                                        <tr>
+                                            <td><strong>@setting.SettingKey</strong></td>
+                                            <td>
+                                                @if (setting.SettingKey == "ContactFormEmails")
+                                                {
+                                                    @foreach (var email in setting.SettingValue.Split(','))
+                                                    {
+                                                        <span class="badge bg-secondary me-1">@email.Trim()</span>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <code>@setting.SettingValue</code>
+                                                }
+                                            </td>
+                                            <td><small class="text-muted">@setting.Description</small></td>
+                                            <td><small>@setting.UpdatedDate.ToString("MM/dd/yyyy HH:mm")</small></td>
+                                            <td><small>@setting.UpdatedBy</small></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">
+                            <h6>No Contact Form Settings Found</h6>
+                            <p class="mb-0">No Contact form email settings are currently configured. Use the form above to add email recipients.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="card mt-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">How to Use Contact Form Email Settings</h5>
+                </div>
+                <div class="card-body">
+                    <ol>
+                        <li><strong>Add Email Addresses:</strong> Enter one or more email addresses in the text box above</li>
+                        <li><strong>Separate with Commas:</strong> Use commas to separate multiple addresses (spaces are OK)</li>
+                        <li><strong>Example:</strong> <code>admin@example.com, manager@example.com, staff@example.com</code></li>
+                        <li><strong>Save Changes:</strong> Click "Update Contact Email Settings" to save</li>
+                        <li><strong>Test Contact Form:</strong> Visit <code>/Info/Contact</code> and submit a test message to verify delivery</li>
+                    </ol>
+                    <div class="alert alert-info mt-3">
+                        <strong>Note:</strong> Changes take effect immediately for new Contact form submissions - no server restart required!
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

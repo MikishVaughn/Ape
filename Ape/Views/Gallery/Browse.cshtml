@@ -1,0 +1,1227 @@
+@model Ape.Models.ViewModels.GalleryBrowseViewModel
+@using Ape.Models
+
+@{
+    ViewData["Title"] = "Image Gallery";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Page Header -->
+<div class="mb-4 mt-4">
+    <div class="text-center">
+        <h2>Image Gallery</h2>
+    </div>
+    <div class="text-center">
+        <p>Browse and manage image galleries</p>
+    </div>
+</div>
+
+<!-- Success/Error Messages -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="row">
+    <!-- Sidebar: Category Tree -->
+    <div class="col-md-3 col-lg-2">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-secondary text-white py-2">
+                <strong>Categories</strong>
+            </div>
+            <div class="card-body p-2" id="categoryTreeContainer">
+                @await Html.PartialAsync("_CategoryTree", Model.CategoryTree)
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="col-md-9 col-lg-10">
+        <div class="card shadow">
+            <!-- Breadcrumb Navigation -->
+            <div class="card-header bg-light py-2">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        @foreach (var crumb in Model.Breadcrumbs)
+                        {
+                            if (crumb.IsCurrent)
+                            {
+                                <li class="breadcrumb-item active" aria-current="page">@crumb.Name</li>
+                            }
+                            else
+                            {
+                                <li class="breadcrumb-item">
+                                    <a href="@Url.Action("Browse", "Gallery", new { categoryId = crumb.CategoryId })">@crumb.Name</a>
+                                </li>
+                            }
+                        }
+                    </ol>
+                </nav>
+            </div>
+
+            <!-- Category Header with Actions -->
+            <div class="card-body border-bottom py-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-0">
+                            @Model.CurrentCategoryName
+                            @if (Model.CurrentCategoryAccessLevel.HasValue && Model.CurrentCategoryAccessLevel.Value > DocumentAccessLevel.Member)
+                            {
+                                <span class="badge bg-warning text-dark ms-2" title="Restricted Access">
+                                    Admin Only
+                                </span>
+                            }
+                        </h5>
+                        @if (!string.IsNullOrEmpty(Model.CurrentCategoryDescription))
+                        {
+                            <small class="text-muted">@Model.CurrentCategoryDescription</small>
+                        }
+                    </div>
+                    @if (Model.CanManage)
+                    {
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#createCategoryModal">
+                                + New Category
+                            </button>
+                            @if (Model.CurrentCategoryId.HasValue)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#uploadImagesModal">
+                                    + Upload Images
+                                </button>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Categories Grid -->
+            @if (Model.Categories.Any())
+            {
+                <div class="card-body border-bottom py-3">
+                    <h6 class="text-muted mb-2">Categories</h6>
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3" id="categoriesGrid">
+                        @foreach (var category in Model.Categories)
+                        {
+                            <div class="col category-item" data-category-id="@category.CategoryId">
+                                <div class="card h-100 folder-card @(category.AccessLevel > DocumentAccessLevel.Member ? "border-warning" : "")">
+                                    <a href="@Url.Action("Browse", "Gallery", new { categoryId = category.CategoryId })" class="text-decoration-none">
+                                        <div class="card-body rounded text-center py-3">
+                                            <div class="folder-icon mb-2">
+                                                @if (category.AccessLevel > DocumentAccessLevel.Member)
+                                                {
+                                                    <span style="font-size: 2rem;">&#128274;</span>
+                                                }
+                                                else
+                                                {
+                                                    <span style="font-size: 2rem;">&#128193;</span>
+                                                }
+                                            </div>
+                                            <div class="folder-name text-truncate" title="@category.Name">@category.Name</div>
+                                            <span class="text-muted small">@category.ImageCount images</span>
+                                        </div>
+                                    </a>
+                                    @if (Model.CanManage)
+                                    {
+                                        <div class="card-footer bg-transparent border-0 py-1">
+                                            <div class="row row-cols-2 g-3">
+                                                <button type="button" class="btn btn-outline-secondary btn-edit-category"
+                                                        onclick="showEditCategoryModal(@category.CategoryId, '@category.Name.Replace("'", "\\'")', @((int)category.AccessLevel), '@(category.Description?.Replace("'", "\\'") ?? "")');">
+                                                    Edit
+                                                </button>
+                                                <button type="button" class="btn btn-outline-danger btn-delete-category"
+                                                        onclick="confirmDeleteCategory(@category.CategoryId, '@category.Name.Replace("'", "\\'")');">
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Images Section -->
+            @if (Model.CurrentCategoryId.HasValue)
+            {
+                <div class="card-body py-3">
+                    <h6 class="text-muted mb-2">Images</h6>
+
+                    @if (Model.Images.Any())
+                    {
+                        <!-- Gallery Summary -->
+                        <div class="mb-2 text-center">
+                            <span class="badge bg-info">@Model.TotalImages Total Images</span>
+                            @if (Model.TotalPages > 1)
+                            {
+                                <span class="badge bg-secondary">Page @Model.CurrentPage of @Model.TotalPages</span>
+                            }
+                        </div>
+
+                        <!-- Pagination Controls (Top) -->
+                        @if (Model.TotalPages > 1)
+                        {
+                            <nav aria-label="Gallery pagination" class="mb-3">
+                                <ul class="pagination pagination-sm justify-content-center mb-0">
+                                    @if (Model.CurrentPage > 1)
+                                    {
+                                        <li class="page-item">
+                                            <a class="page-link" href="@Url.Action("Browse", "Gallery", new { categoryId = Model.CurrentCategoryId, page = 1, pageSize = Model.PageSize })" title="First page">
+                                                <i class="bi bi-chevron-double-left"></i>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="@Url.Action("Browse", "Gallery", new { categoryId = Model.CurrentCategoryId, page = Model.CurrentPage - 1, pageSize = Model.PageSize })" title="Previous page">
+                                                <i class="bi bi-chevron-left"></i>
+                                            </a>
+                                        </li>
+                                    }
+                                    else
+                                    {
+                                        <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-double-left"></i></span></li>
+                                        <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-left"></i></span></li>
+                                    }
+
+                                    @{
+                                        int startPage = Math.Max(1, Model.CurrentPage - 2);
+                                        int endPage = Math.Min(Model.TotalPages, Model.CurrentPage + 2);
+                                    }
+
+                                    @for (int i = startPage; i <= endPage; i++)
+                                    {
+                                        if (i == Model.CurrentPage)
+                                        {
+                                            <li class="page-item active"><span class="page-link">@i</span></li>
+                                        }
+                                        else
+                                        {
+                                            <li class="page-item">
+                                                <a class="page-link" href="@Url.Action("Browse", "Gallery", new { categoryId = Model.CurrentCategoryId, page = i, pageSize = Model.PageSize })">@i</a>
+                                            </li>
+                                        }
+                                    }
+
+                                    @if (Model.CurrentPage < Model.TotalPages)
+                                    {
+                                        <li class="page-item">
+                                            <a class="page-link" href="@Url.Action("Browse", "Gallery", new { categoryId = Model.CurrentCategoryId, page = Model.CurrentPage + 1, pageSize = Model.PageSize })" title="Next page">
+                                                <i class="bi bi-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="@Url.Action("Browse", "Gallery", new { categoryId = Model.CurrentCategoryId, page = Model.TotalPages, pageSize = Model.PageSize })" title="Last page">
+                                                <i class="bi bi-chevron-double-right"></i>
+                                            </a>
+                                        </li>
+                                    }
+                                    else
+                                    {
+                                        <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-right"></i></span></li>
+                                        <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-double-right"></i></span></li>
+                                    }
+                                </ul>
+                            </nav>
+                        }
+
+                        <!-- Image Grid -->
+                        <div class="row gx-2 gy-2" id="imagesGrid">
+                            @foreach (var image in Model.Images)
+                            {
+                                <div class="col-12 col-md-6 col-lg-4 col-xl-3" data-image-id="@image.ImageId">
+                                    <div class="card gallery-card h-100 shadow-sm">
+                                        <a href="#" onclick="openLightbox('@image.ImageUrl', '@(image.OriginalFileName?.Replace("'", "\\'") ?? image.FileName)'); return false;">
+                                            <div class="gallery-image-container">
+                                                <img src="@image.ThumbnailUrl"
+                                                     alt="@(image.OriginalFileName ?? image.FileName)"
+                                                     loading="lazy"
+                                                     class="gallery-thumbnail rounded-top">
+                                            </div>
+                                        </a>
+                                        <div class="card-body p-2 text-center">
+                                            <p class="card-text mb-0 text-truncate small" title="@(image.OriginalFileName ?? image.FileName)">
+                                                <strong>@(image.OriginalFileName ?? image.FileName)</strong>
+                                            </p>
+                                            @if (!string.IsNullOrEmpty(image.Description))
+                                            {
+                                                <small class="text-muted d-block text-truncate">@image.Description</small>
+                                            }
+                                            @if (Model.CanManage)
+                                            {
+                                                <div class="btn-group btn-group-sm mt-1 w-100" role="group">
+                                                    <button type="button" class="btn btn-outline-secondary" onclick="showEditImageModal(@image.ImageId, '@(image.OriginalFileName?.Replace("'", "\\'") ?? "")', '@(image.Description?.Replace("'", "\\'") ?? "")');" title="Edit">
+                                                        <i class="bi bi-pencil"></i> Edit
+                                                    </button>
+                                                    <button type="button" class="btn btn-outline-secondary" onclick="showMoveImageModal(@image.ImageId, '@(image.OriginalFileName?.Replace("'", "\\'") ?? image.FileName)', @image.CategoryId);" title="Move">
+                                                        <i class="bi bi-folder-symlink"></i> Move
+                                                    </button>
+                                                    <button type="button" class="btn btn-outline-danger" onclick="confirmDeleteImage(@image.ImageId, '@(image.OriginalFileName?.Replace("'", "\\'") ?? image.FileName)', @image.CategoryId);" title="Delete">
+                                                        <i class="bi bi-trash"></i> Delete
+                                                    </button>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Pagination Controls (Bottom) -->
+                        @if (Model.TotalPages > 1)
+                        {
+                            <nav aria-label="Gallery pagination" class="mt-4 mb-3">
+                                <ul class="pagination justify-content-center">
+                                    @if (Model.CurrentPage > 1)
+                                    {
+                                        <li class="page-item">
+                                            <a class="page-link" href="@Url.Action("Browse", "Gallery", new { categoryId = Model.CurrentCategoryId, page = 1, pageSize = Model.PageSize })" title="First page">
+                                                <i class="bi bi-chevron-double-left"></i> First
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="@Url.Action("Browse", "Gallery", new { categoryId = Model.CurrentCategoryId, page = Model.CurrentPage - 1, pageSize = Model.PageSize })" title="Previous page">
+                                                <i class="bi bi-chevron-left"></i> Previous
+                                            </a>
+                                        </li>
+                                    }
+                                    else
+                                    {
+                                        <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-double-left"></i> First</span></li>
+                                        <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-left"></i> Previous</span></li>
+                                    }
+
+                                    <li class="page-item disabled">
+                                        <span class="page-link bg-light">
+                                            Page @Model.CurrentPage of @Model.TotalPages
+                                        </span>
+                                    </li>
+
+                                    @if (Model.CurrentPage < Model.TotalPages)
+                                    {
+                                        <li class="page-item">
+                                            <a class="page-link" href="@Url.Action("Browse", "Gallery", new { categoryId = Model.CurrentCategoryId, page = Model.CurrentPage + 1, pageSize = Model.PageSize })" title="Next page">
+                                                Next <i class="bi bi-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="@Url.Action("Browse", "Gallery", new { categoryId = Model.CurrentCategoryId, page = Model.TotalPages, pageSize = Model.PageSize })" title="Last page">
+                                                Last <i class="bi bi-chevron-double-right"></i>
+                                            </a>
+                                        </li>
+                                    }
+                                    else
+                                    {
+                                        <li class="page-item disabled"><span class="page-link">Next <i class="bi bi-chevron-right"></i></span></li>
+                                        <li class="page-item disabled"><span class="page-link">Last <i class="bi bi-chevron-double-right"></i></span></li>
+                                    }
+                                </ul>
+                            </nav>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-4">
+                            <div style="font-size: 3rem;">&#128247;</div>
+                            <p class="mb-0">No images in this category</p>
+                            @if (Model.CanManage)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-success mt-2" data-bs-toggle="modal" data-bs-target="#uploadImagesModal">
+                                    Upload images
+                                </button>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="card-body py-3 text-center text-muted">
+                    <p class="mb-0">Select a category to view its images</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Lightbox Modal -->
+<div class="modal fade" id="lightboxModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content bg-dark border-0">
+            <div class="modal-header border-0 py-1">
+                <h6 class="modal-title text-white" id="lightboxTitle"></h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0 text-center">
+                <img id="lightboxImage" src="" alt="" class="img-fluid" style="max-height: 85vh; object-fit: contain;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Category Modal -->
+<div class="modal fade" id="createCategoryModal" tabindex="-1" aria-labelledby="createCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="CreateCategoryForm" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="parentCategoryId" value="@Model.CurrentCategoryId" />
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createCategoryModalLabel">Create New Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="categoryName" class="form-label">Category Name</label>
+                        <input type="text" class="form-control" id="categoryName" name="categoryName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="categoryDescription" class="form-label">Description (optional)</label>
+                        <textarea class="form-control" id="categoryDescription" name="description" rows="2" maxlength="500"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="accessLevel" class="form-label">Access Level</label>
+                        <select class="form-select" id="accessLevel" name="accessLevel">
+                            <option value="0">Member (All users)</option>
+                            <option value="1">Admin Only</option>
+                        </select>
+                        <div class="form-text">Controls who can view this category and its images.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Category</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Images Modal -->
+<div class="modal fade" id="uploadImagesModal" tabindex="-1" aria-labelledby="uploadImagesModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            @Html.AntiForgeryToken()
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadImagesModalLabel">Upload Images</h5>
+                <button type="button" class="btn-close" id="uploadCloseBtn" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- File Selection (hidden during upload) -->
+                <div id="uploadSelectSection">
+                    <div class="mb-3">
+                        <label class="form-label">Select Image Files</label>
+                        <div class="drop-zone" id="dropZone">
+                            <div class="drop-zone-text">
+                                <i class="bi bi-cloud-upload" style="font-size: 2rem;"></i>
+                                <p class="mb-0">Drag & drop images here or click to browse</p>
+                                <small class="text-muted">Supported: JPG, PNG, GIF, BMP, WebP</small>
+                            </div>
+                            <input type="file" class="form-control d-none" id="files" accept="image/*" multiple>
+                        </div>
+                        <div id="fileList" class="mt-2 small"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="uploadDescription" class="form-label">Description (optional, applies to all)</label>
+                        <textarea class="form-control" id="uploadDescription" rows="2" maxlength="500"></textarea>
+                    </div>
+                </div>
+
+                <!-- Upload Progress (hidden initially) -->
+                <div id="uploadProgressSection" style="display: none;">
+                    <div class="text-center mb-3">
+                        <i class="bi bi-cloud-arrow-up" style="font-size: 2rem; color: #0d6efd;"></i>
+                    </div>
+                    <div class="mb-2">
+                        <strong id="uploadStatusText">Preparing files...</strong>
+                    </div>
+                    <div class="progress mb-2" style="height: 24px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" id="uploadProgressBar"
+                             role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                            0%
+                        </div>
+                    </div>
+                    <small class="text-muted" id="uploadCurrentFile"></small>
+                    <div id="uploadResultSection" class="mt-3" style="display: none;">
+                        <div class="alert mb-0" id="uploadResultAlert"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="uploadCancelBtn" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="uploadStartBtn" disabled onclick="startUpload()">
+                    <i class="bi bi-cloud-upload"></i> Upload
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Category Modal -->
+<div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCategoryModalLabel">Edit Category</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editCategoryId" />
+                <div class="mb-3">
+                    <label for="editCategoryName" class="form-label">Category Name</label>
+                    <input type="text" class="form-control" id="editCategoryName" required>
+                </div>
+                <div class="mb-3">
+                    <label for="editCategoryDescription" class="form-label">Description</label>
+                    <textarea class="form-control" id="editCategoryDescription" rows="2" maxlength="500"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="editCategoryAccessLevel" class="form-label">Access Level</label>
+                    <select class="form-select" id="editCategoryAccessLevel">
+                        <option value="0">Member (All users)</option>
+                        <option value="1">Admin Only</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveCategory()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Image Modal -->
+<div class="modal fade" id="editImageModal" tabindex="-1" aria-labelledby="editImageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editImageModalLabel">Edit Image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editImageId" />
+                <div class="mb-3">
+                    <label for="editImageName" class="form-label">Display Name</label>
+                    <input type="text" class="form-control" id="editImageName" required>
+                </div>
+                <div class="mb-3">
+                    <label for="editImageDescription" class="form-label">Description</label>
+                    <textarea class="form-control" id="editImageDescription" rows="2" maxlength="500"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveImage()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Move Image Modal -->
+<div class="modal fade" id="moveImageModal" tabindex="-1" aria-labelledby="moveImageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="moveImageModalLabel">Move Image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="moveImageId" />
+                <input type="hidden" id="moveImageCurrentCategory" />
+                <p>Moving: <strong id="moveImageName"></strong></p>
+                <div class="mb-3">
+                    <label for="targetCategoryId" class="form-label">Select Target Category</label>
+                    <select class="form-select" id="targetCategoryId"></select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="moveImage()">Move Image</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Action Modal -->
+<div class="modal fade" id="confirmActionModal" tabindex="-1" aria-labelledby="confirmActionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmActionModalLabel">Confirm Action</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="confirmActionBody">
+                Are you sure?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmActionBtn" onclick="">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script>
+        const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+
+        // ============================================================
+        // Lightbox
+        // ============================================================
+
+        function openLightbox(imageUrl, title) {
+            document.getElementById('lightboxImage').src = imageUrl;
+            document.getElementById('lightboxTitle').textContent = title;
+            new bootstrap.Modal(document.getElementById('lightboxModal')).show();
+        }
+
+        // ============================================================
+        // Confirm Action Modal
+        // ============================================================
+
+        let confirmCallback = null;
+
+        function showConfirmModal(message, callback, options = {}) {
+            const modal = document.getElementById('confirmActionModal');
+            document.getElementById('confirmActionBody').innerHTML = message;
+            document.getElementById('confirmActionModalLabel').textContent = options.title || 'Confirm Action';
+
+            const confirmBtn = document.getElementById('confirmActionBtn');
+            confirmBtn.textContent = options.confirmText || 'Confirm';
+            confirmBtn.className = 'btn ' + (options.confirmClass || 'btn-danger');
+
+            confirmCallback = callback;
+            confirmBtn.onclick = function () {
+                bootstrap.Modal.getInstance(modal).hide();
+                if (confirmCallback) confirmCallback();
+            };
+
+            new bootstrap.Modal(modal).show();
+        }
+
+        // ============================================================
+        // Category Operations
+        // ============================================================
+
+        function showEditCategoryModal(categoryId, categoryName, accessLevel, description) {
+            document.getElementById('editCategoryId').value = categoryId;
+            document.getElementById('editCategoryName').value = categoryName;
+            document.getElementById('editCategoryAccessLevel').value = accessLevel;
+            document.getElementById('editCategoryDescription').value = description || '';
+            new bootstrap.Modal(document.getElementById('editCategoryModal')).show();
+        }
+
+        function saveCategory() {
+            const categoryId = document.getElementById('editCategoryId').value;
+            const newName = document.getElementById('editCategoryName').value.trim();
+            const accessLevel = document.getElementById('editCategoryAccessLevel').value;
+            const description = document.getElementById('editCategoryDescription').value.trim();
+
+            if (!newName) {
+                alert('Category name is required.');
+                return;
+            }
+
+            // Rename
+            const renameData = new FormData();
+            renameData.append('categoryId', categoryId);
+            renameData.append('newName', newName);
+            renameData.append('__RequestVerificationToken', csrfToken);
+
+            fetch('@Url.Action("RenameCategory", "Gallery")', { method: 'POST', body: renameData })
+            .then(r => r.json())
+            .then(data => {
+                if (!data.success) throw new Error(data.message);
+
+                // Update access level
+                const accessData = new FormData();
+                accessData.append('categoryId', categoryId);
+                accessData.append('accessLevel', accessLevel);
+                accessData.append('__RequestVerificationToken', csrfToken);
+
+                return fetch('@Url.Action("UpdateCategoryAccessLevel", "Gallery")', { method: 'POST', body: accessData });
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (!data.success) throw new Error(data.message);
+
+                // Update description
+                const descData = new FormData();
+                descData.append('categoryId', categoryId);
+                descData.append('description', description);
+                descData.append('__RequestVerificationToken', csrfToken);
+
+                return fetch('@Url.Action("UpdateCategoryDescription", "Gallery")', { method: 'POST', body: descData });
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    throw new Error(data.message);
+                }
+            })
+            .catch(error => alert('Error: ' + error.message));
+        }
+
+        function confirmDeleteCategory(categoryId, categoryName) {
+            showConfirmModal(
+                `Are you sure you want to delete the category "<strong>${categoryName}</strong>"?<br><br>If the category contains images or subcategories, they will also be deleted.`,
+                function() { deleteCategory(categoryId); },
+                { title: 'Delete Category', confirmText: 'Delete', confirmClass: 'btn-danger' }
+            );
+        }
+
+        function deleteCategory(categoryId) {
+            const formData = new FormData();
+            formData.append('categoryId', categoryId);
+            formData.append('deleteContents', 'true');
+            formData.append('__RequestVerificationToken', csrfToken);
+
+            fetch('@Url.Action("DeleteCategory", "Gallery")', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) window.location.reload();
+                else alert('Error: ' + data.message);
+            })
+            .catch(() => alert('Error deleting category.'));
+        }
+
+        // ============================================================
+        // Image Operations
+        // ============================================================
+
+        function showEditImageModal(imageId, originalName, description) {
+            document.getElementById('editImageId').value = imageId;
+            document.getElementById('editImageName').value = originalName;
+            document.getElementById('editImageDescription').value = description || '';
+            new bootstrap.Modal(document.getElementById('editImageModal')).show();
+        }
+
+        function saveImage() {
+            const imageId = document.getElementById('editImageId').value;
+            const newName = document.getElementById('editImageName').value.trim();
+            const description = document.getElementById('editImageDescription').value.trim();
+
+            if (!newName) {
+                alert('Image name is required.');
+                return;
+            }
+
+            // Rename
+            const renameData = new FormData();
+            renameData.append('imageId', imageId);
+            renameData.append('newName', newName);
+            renameData.append('__RequestVerificationToken', csrfToken);
+
+            fetch('@Url.Action("RenameImage", "Gallery")', { method: 'POST', body: renameData })
+            .then(r => r.json())
+            .then(data => {
+                if (!data.success) throw new Error(data.message);
+
+                // Update description
+                const descData = new FormData();
+                descData.append('imageId', imageId);
+                descData.append('description', description);
+                descData.append('__RequestVerificationToken', csrfToken);
+
+                return fetch('@Url.Action("UpdateImageDescription", "Gallery")', { method: 'POST', body: descData });
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) window.location.reload();
+                else throw new Error(data.message);
+            })
+            .catch(error => alert('Error: ' + error.message));
+        }
+
+        function showMoveImageModal(imageId, imageName, currentCategoryId) {
+            document.getElementById('moveImageId').value = imageId;
+            document.getElementById('moveImageName').textContent = imageName;
+            document.getElementById('moveImageCurrentCategory').value = currentCategoryId;
+
+            fetch('@Url.Action("GetCategoryTree", "Gallery")')
+            .then(r => r.json())
+            .then(tree => {
+                const select = document.getElementById('targetCategoryId');
+                select.innerHTML = '';
+
+                function addOptions(nodes, level = 0) {
+                    nodes.forEach(node => {
+                        const option = document.createElement('option');
+                        option.value = node.categoryId;
+                        option.textContent = '\u00A0\u00A0'.repeat(level) + node.name;
+                        if (node.categoryId == currentCategoryId) {
+                            option.disabled = true;
+                            option.textContent += ' (current)';
+                        }
+                        select.appendChild(option);
+                        if (node.children && node.children.length) {
+                            addOptions(node.children, level + 1);
+                        }
+                    });
+                }
+
+                addOptions(tree);
+                new bootstrap.Modal(document.getElementById('moveImageModal')).show();
+            });
+        }
+
+        function moveImage() {
+            const imageId = document.getElementById('moveImageId').value;
+            const targetCategoryId = document.getElementById('targetCategoryId').value;
+
+            const formData = new FormData();
+            formData.append('imageId', imageId);
+            formData.append('targetCategoryId', targetCategoryId);
+            formData.append('__RequestVerificationToken', csrfToken);
+
+            fetch('@Url.Action("MoveImage", "Gallery")', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) window.location.reload();
+                else alert('Error: ' + data.message);
+            })
+            .catch(() => alert('Error moving image.'));
+        }
+
+        function confirmDeleteImage(imageId, imageName, categoryId) {
+            showConfirmModal(
+                `Are you sure you want to delete the image "<strong>${imageName}</strong>"?<br><br>This action cannot be undone.`,
+                function() { deleteImage(imageId, categoryId); },
+                { title: 'Delete Image', confirmText: 'Delete', confirmClass: 'btn-danger' }
+            );
+        }
+
+        function deleteImage(imageId, categoryId) {
+            const formData = new FormData();
+            formData.append('imageId', imageId);
+            formData.append('categoryId', categoryId);
+            formData.append('__RequestVerificationToken', csrfToken);
+
+            fetch('@Url.Action("DeleteImage", "Gallery")', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) window.location.reload();
+                else alert('Error: ' + data.message);
+            })
+            .catch(() => alert('Error deleting image.'));
+        }
+
+        // ============================================================
+        // Drag-and-Drop Sort Order
+        // ============================================================
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const imagesGrid = document.getElementById('imagesGrid');
+            if (imagesGrid && document.querySelector('[data-image-id]')) {
+                Sortable.create(imagesGrid, {
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    onEnd: function() { updateImageSortOrder(); }
+                });
+            }
+        });
+
+        function updateImageSortOrder() {
+            const items = document.querySelectorAll('#imagesGrid [data-image-id]');
+            const imageIds = [];
+            const sortOrders = [];
+
+            items.forEach((item, index) => {
+                const imageId = item.getAttribute('data-image-id');
+                if (imageId) {
+                    imageIds.push(parseInt(imageId));
+                    sortOrders.push(index + 1);
+                }
+            });
+
+            const formData = new FormData();
+            imageIds.forEach(id => formData.append('imageIds', id));
+            sortOrders.forEach(order => formData.append('sortOrders', order));
+            formData.append('__RequestVerificationToken', csrfToken);
+
+            fetch('@Url.Action("UpdateImageSortOrder", "Gallery")', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (!data.success) console.error('Error updating sort order:', data.message);
+            });
+        }
+
+        // ============================================================
+        // Upload System: Client-Side Resize + Sequential Upload
+        // ============================================================
+
+        // Selected files ready for upload (filtered, no "thumb" files)
+        let selectedFiles = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('files');
+
+            if (!dropZone || !fileInput) return;
+
+            dropZone.addEventListener('click', () => fileInput.click());
+
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('drop-zone-active');
+            });
+
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('drop-zone-active');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('drop-zone-active');
+                handleFileSelection(e.dataTransfer.files);
+            });
+
+            fileInput.addEventListener('change', () => handleFileSelection(fileInput.files));
+
+            // Reset modal state when it is hidden
+            const uploadModal = document.getElementById('uploadImagesModal');
+            if (uploadModal) {
+                uploadModal.addEventListener('hidden.bs.modal', resetUploadModal);
+            }
+        });
+
+        function handleFileSelection(fileListRaw) {
+            const fileList = document.getElementById('fileList');
+            const uploadBtn = document.getElementById('uploadStartBtn');
+            selectedFiles = [];
+
+            if (!fileListRaw || fileListRaw.length === 0) {
+                if (fileList) fileList.innerHTML = '';
+                if (uploadBtn) uploadBtn.disabled = true;
+                return;
+            }
+
+            let skippedCount = 0;
+            for (let i = 0; i < fileListRaw.length; i++) {
+                const file = fileListRaw[i];
+                // Skip files with "thumb" in filename
+                if (file.name.toLowerCase().includes('thumb')) {
+                    skippedCount++;
+                    continue;
+                }
+                selectedFiles.push(file);
+            }
+
+            if (fileList) {
+                let html = '';
+                if (selectedFiles.length > 0) {
+                    html = `<strong>${selectedFiles.length} file(s) ready for upload:</strong><ul class="mb-0">`;
+                    for (let i = 0; i < selectedFiles.length; i++) {
+                        html += `<li>${selectedFiles[i].name} (${(selectedFiles[i].size / 1024).toFixed(1)} KB)</li>`;
+                    }
+                    html += '</ul>';
+                }
+                if (skippedCount > 0) {
+                    html += `<small class="text-warning"><i class="bi bi-exclamation-triangle"></i> ${skippedCount} thumbnail file(s) skipped</small>`;
+                }
+                if (selectedFiles.length === 0 && skippedCount > 0) {
+                    html = `<div class="text-warning">All selected files were thumbnail files and were skipped.</div>`;
+                }
+                fileList.innerHTML = html;
+            }
+
+            if (uploadBtn) {
+                uploadBtn.disabled = selectedFiles.length === 0;
+            }
+        }
+
+        /**
+         * Resize an image file using Canvas API.
+         * Returns a Promise<Blob> of the resized JPEG image.
+         */
+        function resizeImage(file, maxWidth, maxHeight) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                const url = URL.createObjectURL(file);
+
+                img.onload = function () {
+                    URL.revokeObjectURL(url);
+
+                    let width = img.width;
+                    let height = img.height;
+
+                    // Only resize if larger than target
+                    if (width > maxWidth || height > maxHeight) {
+                        const aspectRatio = width / height;
+
+                        if (width / maxWidth > height / maxHeight) {
+                            width = maxWidth;
+                            height = Math.round(width / aspectRatio);
+                        } else {
+                            height = maxHeight;
+                            width = Math.round(height * aspectRatio);
+                        }
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob(
+                        (blob) => {
+                            if (blob) {
+                                resolve(blob);
+                            } else {
+                                reject(new Error('Canvas toBlob failed'));
+                            }
+                        },
+                        'image/jpeg',
+                        0.90
+                    );
+                };
+
+                img.onerror = function () {
+                    URL.revokeObjectURL(url);
+                    reject(new Error('Failed to load image: ' + file.name));
+                };
+
+                img.src = url;
+            });
+        }
+
+        /**
+         * Start the sequential upload process.
+         */
+        async function startUpload() {
+            if (selectedFiles.length === 0) return;
+
+            const categoryId = @(Model.CurrentCategoryId ?? 0);
+            const description = document.getElementById('uploadDescription')?.value || '';
+            const totalFiles = selectedFiles.length;
+            const MAX_WIDTH = 1920;
+            const MAX_HEIGHT = 1080;
+
+            // Switch to progress view
+            document.getElementById('uploadSelectSection').style.display = 'none';
+            document.getElementById('uploadProgressSection').style.display = 'block';
+            document.getElementById('uploadStartBtn').disabled = true;
+            document.getElementById('uploadCancelBtn').disabled = true;
+            document.getElementById('uploadCloseBtn').disabled = true;
+
+            let successCount = 0;
+            let failCount = 0;
+            const errors = [];
+
+            for (let i = 0; i < totalFiles; i++) {
+                const file = selectedFiles[i];
+                const fileNum = i + 1;
+                const pct = Math.round((i / totalFiles) * 100);
+
+                // Update progress UI
+                document.getElementById('uploadStatusText').textContent = `Uploading ${fileNum} of ${totalFiles}...`;
+                document.getElementById('uploadCurrentFile').textContent = file.name;
+                updateProgressBar(pct);
+
+                try {
+                    // Resize client-side
+                    const resizedBlob = await resizeImage(file, MAX_WIDTH, MAX_HEIGHT);
+
+                    // Build FormData for single-file upload
+                    const formData = new FormData();
+                    formData.append('categoryId', categoryId);
+                    formData.append('file', resizedBlob, file.name);
+                    formData.append('description', description);
+                    formData.append('__RequestVerificationToken', csrfToken);
+
+                    // Upload
+                    const response = await fetch('@Url.Action("UploadSingleImage", "Gallery")', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        successCount++;
+                    } else {
+                        failCount++;
+                        errors.push(`${file.name}: ${result.message}`);
+                    }
+                } catch (err) {
+                    failCount++;
+                    errors.push(`${file.name}: ${err.message}`);
+                }
+            }
+
+            // Upload complete
+            updateProgressBar(100);
+            document.getElementById('uploadStatusText').textContent = 'Upload complete!';
+            document.getElementById('uploadCurrentFile').textContent = '';
+
+            // Show result
+            const resultSection = document.getElementById('uploadResultSection');
+            const resultAlert = document.getElementById('uploadResultAlert');
+            resultSection.style.display = 'block';
+
+            if (failCount === 0) {
+                resultAlert.className = 'alert alert-success mb-0';
+                resultAlert.innerHTML = `<i class="bi bi-check-circle-fill"></i> ${successCount} image(s) uploaded successfully.`;
+            } else {
+                resultAlert.className = 'alert alert-warning mb-0';
+                let msg = `<i class="bi bi-exclamation-triangle-fill"></i> ${successCount} uploaded, ${failCount} failed.`;
+                if (errors.length > 0) {
+                    msg += `<ul class="mb-0 mt-1">`;
+                    errors.forEach(e => msg += `<li>${e}</li>`);
+                    msg += `</ul>`;
+                }
+                resultAlert.innerHTML = msg;
+            }
+
+            // Re-enable close/cancel and reload after brief pause
+            document.getElementById('uploadCloseBtn').disabled = false;
+            document.getElementById('uploadCancelBtn').disabled = false;
+            document.getElementById('uploadCancelBtn').textContent = 'Close';
+            document.getElementById('uploadStartBtn').style.display = 'none';
+
+            // Auto-reload page after 1.5 seconds if any uploads succeeded
+            if (successCount > 0) {
+                setTimeout(() => window.location.reload(), 1500);
+            }
+        }
+
+        function updateProgressBar(pct) {
+            const bar = document.getElementById('uploadProgressBar');
+            bar.style.width = pct + '%';
+            bar.setAttribute('aria-valuenow', pct);
+            bar.textContent = pct + '%';
+        }
+
+        function resetUploadModal() {
+            selectedFiles = [];
+            const fileInput = document.getElementById('files');
+            if (fileInput) fileInput.value = '';
+
+            document.getElementById('uploadSelectSection').style.display = 'block';
+            document.getElementById('uploadProgressSection').style.display = 'none';
+            document.getElementById('uploadResultSection').style.display = 'none';
+
+            document.getElementById('uploadStartBtn').disabled = true;
+            document.getElementById('uploadStartBtn').style.display = '';
+            document.getElementById('uploadCancelBtn').disabled = false;
+            document.getElementById('uploadCancelBtn').textContent = 'Cancel';
+            document.getElementById('uploadCloseBtn').disabled = false;
+
+            document.getElementById('uploadProgressBar').style.width = '0%';
+            document.getElementById('uploadProgressBar').textContent = '0%';
+            document.getElementById('uploadStatusText').textContent = 'Preparing files...';
+            document.getElementById('uploadCurrentFile').textContent = '';
+
+            const fileList = document.getElementById('fileList');
+            if (fileList) fileList.innerHTML = '';
+
+            const descField = document.getElementById('uploadDescription');
+            if (descField) descField.value = '';
+        }
+    </script>
+
+    <style>
+        .gallery-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .gallery-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15) !important;
+        }
+        .gallery-image-container {
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            overflow: hidden;
+        }
+        .gallery-thumbnail {
+            max-width: 100%;
+            max-height: 300px;
+            height: auto;
+            width: auto;
+            object-fit: contain;
+        }
+        .folder-card {
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .folder-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .folder-card.border-warning {
+            border-width: 2px !important;
+        }
+        .folder-name {
+            font-weight: 500;
+            color: #333;
+        }
+        .sortable-ghost {
+            opacity: 0.4;
+        }
+        #categoryTreeContainer {
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
+        }
+        /* Drop zone styles */
+        .drop-zone {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+        .drop-zone:hover,
+        .drop-zone-active {
+            border-color: #0d6efd;
+            background-color: #f0f7ff;
+        }
+        .drop-zone-text {
+            color: #666;
+        }
+        /* Lightbox */
+        #lightboxModal .modal-body {
+            background-color: #000;
+        }
+        /* Mobile responsive */
+        @@media (max-width: 576px) {
+            .col-md-3.col-lg-2 {
+                display: none;
+            }
+            .col-md-9.col-lg-10 {
+                width: 100%;
+            }
+            .card-body .btn-group {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+            .card-body .btn-group .btn {
+                border-radius: 4px !important;
+                white-space: nowrap;
+            }
+            .gallery-image-container {
+                height: 200px;
+            }
+            .gallery-thumbnail {
+                max-height: 200px;
+            }
+        }
+    </style>
+}

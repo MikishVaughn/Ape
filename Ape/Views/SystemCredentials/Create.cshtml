@@ -1,0 +1,104 @@
+@model Ape.Models.ViewModels.CredentialEditViewModel
+@{
+    ViewData["Title"] = "Add New Credential";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="bi bi-plus-circle"></i> Add New Credential
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input asp-for="CredentialName" class="form-control" placeholder="Credential Name" required />
+                                    <label asp-for="CredentialName"></label>
+                                    <span asp-validation-for="CredentialName" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <select asp-for="Category" class="form-select" required>
+                                        <option value="">Select Category...</option>
+                                        @if (ViewBag.Categories is List<string> categories)
+                                        {
+                                            @foreach (var category in categories)
+                                            {
+                                                <option value="@category">@category</option>
+                                            }
+                                        }
+                                    </select>
+                                    <label asp-for="Category"></label>
+                                    <span asp-validation-for="Category" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="CredentialKey" class="form-control" placeholder="Credential Key" required />
+                            <label asp-for="CredentialKey"></label>
+                            <span asp-validation-for="CredentialKey" class="text-danger"></span>
+                            <small class="form-text text-muted">
+                                Unique identifier (e.g., "VISUAL_CROSSING_API_KEY", "DB_CONNECTION_STRING")
+                            </small>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <textarea asp-for="CredentialValue" class="form-control" placeholder="Credential Value"
+                                      style="height: 100px;" required></textarea>
+                            <label asp-for="CredentialValue"></label>
+                            <span asp-validation-for="CredentialValue" class="text-danger"></span>
+                            <small class="form-text text-muted">
+                                The actual credential value (will be encrypted with AES256)
+                            </small>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <textarea asp-for="Description" class="form-control" placeholder="Description"
+                                      style="height: 80px;"></textarea>
+                            <label asp-for="Description"></label>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                            <small class="form-text text-muted">
+                                Optional description of what this credential is used for
+                            </small>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                            <label asp-for="IsActive" class="form-check-label">
+                                Active (uncheck to disable without deleting)
+                            </label>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle-fill"></i> <strong>Security Note:</strong>
+                            This credential will be encrypted using AES256 encryption before being stored in the database.
+                            Only users with admin access can view or modify credentials.
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-save"></i> Create Credential
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

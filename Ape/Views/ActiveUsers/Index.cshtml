@@ -1,0 +1,342 @@
+@model Ape.Models.ViewModels.ActiveUsersViewModel
+@using Ape.Models.ViewModels
+
+@{
+    ViewData["Title"] = "Active Users - Deployment Safety Check";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Page Header -->
+<div class="text-center mt-4">
+    <h2>Active Users Dashboard</h2>
+</div>
+
+<div class="text-center">
+    <p>Monitor user activity to find safe deployment windows</p>
+</div>
+
+<div class="text-center mb-3">
+    <a asp-controller="Info" asp-action="Index" class="btn btn-secondary"><i class="bi bi-house"></i> Back to Home</a>
+    <button type="button" class="btn btn-info" onclick="location.reload()"><i class="bi bi-arrow-clockwise"></i> Refresh Status</button>
+</div>
+
+<!-- Activity Summary Cards -->
+<div class="container mb-4">
+    <div class="row g-3">
+        <!-- Active Now -->
+        <div class="col-md-3 col-sm-6">
+            @{
+                var activeNowBg = Model.ActiveNowExcludingSelfCount > 0 ? "bg-danger" : (Model.ActiveNowCount > 0 ? "bg-info" : "bg-secondary");
+                var activeNowLabel = Model.ActiveNowExcludingSelfCount > 0 ? "DON'T DEPLOY" : (Model.ActiveNowCount > 0 ? "Just you!" : "None");
+            }
+            <div class="card text-white @activeNowBg">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">@Model.ActiveNowCount</h3>
+                    <small><i class="bi bi-circle-fill text-danger"></i> Active Now</small>
+                    <div class="mt-1" style="font-size: 0.85rem;">
+                        <strong>@activeNowLabel</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Recently -->
+        <div class="col-md-3 col-sm-6">
+            <div class="card text-dark @(Model.ActiveRecentlyCount > 0 ? "bg-warning" : "bg-light")">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">@Model.ActiveRecentlyCount</h3>
+                    <small><i class="bi bi-circle-fill text-warning"></i> Active Recently</small>
+                    <div class="mt-1" style="font-size: 0.85rem;">
+                        Probably Safe
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Idle -->
+        <div class="col-md-3 col-sm-6">
+            <div class="card text-white @(Model.IdleCount > 0 ? "bg-info" : "bg-secondary")">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">@Model.IdleCount</h3>
+                    <small><i class="bi bi-circle"></i> Idle Session</small>
+                    <div class="mt-1" style="font-size: 0.85rem;">
+                        Safe to Deploy
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Session Expired -->
+        <div class="col-md-3 col-sm-6">
+            <div class="card text-white @(Model.ExpiredCount > 0 ? "bg-success" : "bg-secondary")">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">@Model.ExpiredCount</h3>
+                    <small><i class="bi bi-circle-fill text-success"></i> Session Expired</small>
+                    <div class="mt-1" style="font-size: 0.85rem;">
+                        Definitely Safe
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Deployment Safety Recommendation -->
+<div class="container mb-4">
+    @if (Model.ActiveNowExcludingSelfCount > 0)
+    {
+        <div class="alert alert-danger" role="alert">
+            <h5 class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> DON'T DEPLOY NOW</h5>
+            <p class="mb-0">
+                <strong>@Model.ActiveNowExcludingSelfCount other user(s)</strong> actively using the system in the last 5 minutes.
+                Deploying now could interrupt their work.
+            </p>
+        </div>
+    }
+    else if (Model.ActiveNowCount > 0)
+    {
+        <div class="alert alert-success" role="alert">
+            <h5 class="alert-heading"><i class="bi bi-check-circle-fill"></i> SAFE TO DEPLOY</h5>
+            <p class="mb-0">
+                You're the only active user right now. Safe to deploy!
+            </p>
+        </div>
+    }
+    else if (Model.ActiveRecentlyCount > 0)
+    {
+        <div class="alert alert-warning" role="alert">
+            <h5 class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> CAUTION</h5>
+            <p class="mb-0">
+                <strong>@Model.ActiveRecentlyCount user(s)</strong> were active 5-30 minutes ago.
+                Probably safe to deploy, but verify they're done with critical tasks.
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-success" role="alert">
+            <h5 class="alert-heading"><i class="bi bi-check-circle-fill"></i> SAFE TO DEPLOY</h5>
+            <p class="mb-0">
+                No users are currently active. This is a safe window for deployment.
+            </p>
+        </div>
+    }
+</div>
+
+<!-- User Activity Table -->
+<div class="container">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">All Member Activity</h5>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.ActiveUsers.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="white-space: nowrap;">Status</th>
+                                <th style="white-space: nowrap;">Name</th>
+                                <th style="white-space: nowrap;">Email</th>
+                                <th style="white-space: nowrap;">Roles</th>
+                                <th style="white-space: nowrap;">Last Activity</th>
+                                <th style="white-space: nowrap;">Last Login</th>
+                                <th style="white-space: nowrap;">Time Since Activity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model.ActiveUsers)
+                            {
+                                var statusClass = user.ActivityStatus switch
+                                {
+                                    ActivityStatus.ActiveNow => "table-danger",
+                                    ActivityStatus.ActiveRecently => "table-warning",
+                                    ActivityStatus.Idle => "table-info",
+                                    _ => ""
+                                };
+
+                                var statusText = user.ActivityStatus switch
+                                {
+                                    ActivityStatus.ActiveNow => "Active Now",
+                                    ActivityStatus.ActiveRecently => "Active Recently",
+                                    ActivityStatus.Idle => "Idle",
+                                    _ => "Expired"
+                                };
+
+                                var statusIcon = user.ActivityStatus switch
+                                {
+                                    ActivityStatus.ActiveNow => "bi-circle-fill text-danger",
+                                    ActivityStatus.ActiveRecently => "bi-circle-fill text-warning",
+                                    ActivityStatus.Idle => "bi-circle",
+                                    _ => "bi-circle-fill text-success"
+                                };
+
+                                var timeSinceActivity = user.LastActivity.HasValue
+                                    ? FormatTimeSince(user.LastActivity.Value)
+                                    : "Never";
+
+                                <tr class="@statusClass">
+                                    <td style="white-space: nowrap;">
+                                        <strong><i class="bi @statusIcon"></i> @statusText</strong>
+                                    </td>
+                                    <td style="white-space: nowrap;">
+                                        @(string.IsNullOrEmpty(user.FullName) ? "N/A" : user.FullName)
+                                        @if (user.IsCurrentUser)
+                                        {
+                                            <span class="badge bg-primary ms-1">you</span>
+                                        }
+                                    </td>
+                                    <td style="white-space: nowrap;">@user.Email</td>
+                                    <td style="white-space: nowrap;"><span class="badge bg-secondary">@user.Roles</span></td>
+                                    <td style="white-space: nowrap;">
+                                        @if (user.LastActivity.HasValue)
+                                        {
+                                            var activityUtc = DateTime.SpecifyKind(user.LastActivity.Value, DateTimeKind.Utc);
+                                            <span class="utc-to-local" data-utc="@activityUtc.ToString("yyyy-MM-ddTHH:mm:ssZ")">
+                                                Loading...
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <em class="text-muted">Never</em>
+                                        }
+                                    </td>
+                                    <td style="white-space: nowrap;">
+                                        @if (user.LastLogin.HasValue)
+                                        {
+                                            var loginUtc = DateTime.SpecifyKind(user.LastLogin.Value, DateTimeKind.Utc);
+                                            <span class="utc-to-local" data-utc="@loginUtc.ToString("yyyy-MM-ddTHH:mm:ssZ")">
+                                                Loading...
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <em class="text-muted">Never</em>
+                                        }
+                                    </td>
+                                    <td style="white-space: nowrap;">
+                                        <strong class="time-ago" data-utc="@(user.LastActivity.HasValue ? DateTime.SpecifyKind(user.LastActivity.Value, DateTimeKind.Utc).ToString("yyyy-MM-ddTHH:mm:ssZ") : "")">
+                                            @timeSinceActivity
+                                        </strong>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="p-4 text-center text-muted">
+                    <p class="mb-0">No active members found.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Legend -->
+<div class="container mt-4 mb-5">
+    <div class="card">
+        <div class="card-header">
+            <h6 class="mb-0"><i class="bi bi-bar-chart"></i> Activity Status Legend</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <strong><i class="bi bi-circle-fill text-danger"></i> Active Now</strong>
+                    <p class="small text-muted mb-0">Last 5 minutes - User actively working</p>
+                </div>
+                <div class="col-md-3">
+                    <strong><i class="bi bi-circle-fill text-warning"></i> Active Recently</strong>
+                    <p class="small text-muted mb-0">5-30 minutes ago - Possibly still working</p>
+                </div>
+                <div class="col-md-3">
+                    <strong><i class="bi bi-circle"></i> Idle</strong>
+                    <p class="small text-muted mb-0">30 min - 12 hours - Session valid but idle</p>
+                </div>
+                <div class="col-md-3">
+                    <strong><i class="bi bi-circle-fill text-success"></i> Expired</strong>
+                    <p class="small text-muted mb-0">12+ hours - Session expired</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private static string FormatTimeSince(DateTime pastTime)
+    {
+        var timeSpan = DateTime.UtcNow - pastTime;
+
+        if (timeSpan.TotalMinutes < 1)
+            return "Just now";
+        if (timeSpan.TotalMinutes < 60)
+            return $"{(int)timeSpan.TotalMinutes} min ago";
+        if (timeSpan.TotalHours < 24)
+            return $"{(int)timeSpan.TotalHours} hr ago";
+
+        return $"{(int)timeSpan.TotalDays} days ago";
+    }
+}
+
+@section Scripts {
+<script>
+    // Convert UTC timestamps to viewer's local timezone
+    document.addEventListener('DOMContentLoaded', function() {
+        function getTimezoneAbbr() {
+            const date = new Date();
+            const timeString = date.toLocaleTimeString('en-US', { timeZoneName: 'short' });
+            const match = timeString.match(/[A-Z]{2,4}$/);
+            return match ? match[0] : '';
+        }
+
+        const tzAbbr = getTimezoneAbbr();
+
+        // Convert all UTC timestamps to local
+        document.querySelectorAll('.utc-to-local').forEach(function(el) {
+            const utcString = el.dataset.utc;
+            if (utcString) {
+                const utcDate = new Date(utcString);
+                const options = {
+                    month: '2-digit',
+                    day: '2-digit',
+                    year: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                };
+                const localString = utcDate.toLocaleString('en-US', options);
+                el.textContent = localString + ' ' + tzAbbr;
+                el.title = utcDate.toISOString() + ' (UTC)';
+            }
+        });
+
+        // Update "time ago" to be accurate from client perspective
+        document.querySelectorAll('.time-ago').forEach(function(el) {
+            const utcString = el.dataset.utc;
+            if (utcString) {
+                const utcDate = new Date(utcString);
+                const now = new Date();
+                const diffMs = now - utcDate;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMs / 3600000);
+                const diffDays = Math.floor(diffMs / 86400000);
+
+                let timeAgo;
+                if (diffMins < 1) {
+                    timeAgo = 'Just now';
+                } else if (diffMins < 60) {
+                    timeAgo = diffMins + ' min ago';
+                } else if (diffHours < 24) {
+                    timeAgo = diffHours + ' hr ago';
+                } else {
+                    timeAgo = diffDays + ' days ago';
+                }
+                el.textContent = timeAgo;
+            }
+        });
+    });
+</script>
+}

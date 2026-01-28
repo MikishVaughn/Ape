@@ -1,0 +1,340 @@
+@model List<Ape.Models.LinkCategory>
+@{
+    ViewData["Title"] = "Manage Link Categories";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- 1. Page Title - Centered -->
+            <div class="text-center">
+                <h2>Manage Link Categories</h2>
+            </div>
+
+            <!-- 2. Description - Centered -->
+            <div class="text-center">
+                <p>Create and organize link categories for the More Links page</p>
+            </div>
+
+            <!-- 3. Navigation Buttons -->
+            <div class="text-center mt-3 mb-4">
+                <div class="btn-group btn-group-sm" role="group">
+                    <a href="@Url.Action("MoreLinks", "Links")" class="btn btn-secondary">
+                        Back to More Links
+                    </a>
+                    <a href="@Url.Action("ManageLinks", "Links")" class="btn btn-primary">
+                        Manage Links
+                    </a>
+                </div>
+            </div>
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <!-- Create New Category Form -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Create New Category</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="CreateCategory" method="post" class="row g-3">
+                        @Html.AntiForgeryToken()
+                        <div class="col-md-6">
+                            <label for="categoryName" class="form-label">Category Name</label>
+                            <input type="text" class="form-control" id="categoryName" name="categoryName"
+                                   placeholder="Enter category name" required maxlength="255">
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-check mt-4 pt-2">
+                                <input class="form-check-input" type="checkbox" id="isAdminOnly" name="isAdminOnly" value="true">
+                                <input type="hidden" name="isAdminOnly" value="false">
+                                <label class="form-check-label" for="isAdminOnly">
+                                    Admin Only
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="submit" class="btn btn-success d-block w-100">
+                                Create Category
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Existing Categories -->
+            @if (Model.Any())
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Existing Categories</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="categoriesTable" class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th width="5%">Order</th>
+                                        <th width="40%">Category Name</th>
+                                        <th width="15%">Type</th>
+                                        <th width="15%">Links Count</th>
+                                        <th width="25%">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (int i = 0; i < Model.Count; i++)
+                                    {
+                                        var category = Model[i];
+                                        <tr data-category-id="@category.CategoryID">
+                                            <td class="text-center">
+                                                <div class="d-flex align-items-center justify-content-center">
+                                                    <span class="drag-handle me-2" title="Drag to reorder">
+                                                        &#8801;
+                                                    </span>
+                                                    <span class="badge bg-secondary">@category.SortOrder</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <strong>@category.CategoryName</strong>
+                                            </td>
+                                            <td>
+                                                @if (category.IsAdminOnly)
+                                                {
+                                                    <span class="badge bg-warning text-dark">Admin Only</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-info">Public</span>
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                <a href="@Url.Action("ManageLinks", new { categoryId = category.CategoryID })"
+                                                   class="badge bg-primary text-decoration-none">
+                                                    @category.CategoryLinks.Count links
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-2">
+                                                    <!-- Manage Links Button -->
+                                                    <a href="@Url.Action("ManageLinks", new { categoryId = category.CategoryID })"
+                                                       class="btn btn-sm btn-outline-primary" title="Manage Links for @category.CategoryName">
+                                                        Links
+                                                    </a>
+
+                                                    <!-- Delete Button -->
+                                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                                            data-category-id="@category.CategoryID"
+                                                            data-category-name="@category.CategoryName"
+                                                            data-link-count="@category.CategoryLinks.Count"
+                                                            onclick="confirmDelete(this)"
+                                                            title="Delete Category: @category.CategoryName">
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <h4>No Categories Found</h4>
+                    <p class="mb-0">No link categories have been created yet. Use the form above to create your first category.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <strong>Warning:</strong> This action cannot be undone.
+                </div>
+                <p>Are you sure you want to delete the category <strong id="categoryNameToDelete"></strong>?</p>
+                <p id="linkCountWarning" class="text-danger" style="display: none;">
+                    This will also delete <span id="linkCount"></span> associated link(s).
+                </p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" method="post" asp-action="DeleteCategory">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="categoryIdToDelete" name="categoryId">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">
+                        Delete Category
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmDelete(button) {
+    const categoryId = button.getAttribute('data-category-id');
+    const categoryName = button.getAttribute('data-category-name');
+    const linkCount = parseInt(button.getAttribute('data-link-count'), 10);
+
+    document.getElementById('categoryIdToDelete').value = categoryId;
+    document.getElementById('categoryNameToDelete').textContent = categoryName;
+
+    const linkCountWarning = document.getElementById('linkCountWarning');
+    const linkCountSpan = document.getElementById('linkCount');
+
+    if (linkCount > 0) {
+        linkCountSpan.textContent = linkCount;
+        linkCountWarning.style.display = 'block';
+    } else {
+        linkCountWarning.style.display = 'none';
+    }
+
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+</script>
+
+<style>
+.table tbody tr:hover {
+    background-color: rgba(0,0,0,0.02);
+}
+.btn-group .btn {
+    border-radius: 0;
+}
+.btn-group .btn:first-child {
+    border-top-left-radius: 0.25rem;
+    border-bottom-left-radius: 0.25rem;
+}
+.btn-group .btn:last-child {
+    border-top-right-radius: 0.25rem;
+    border-bottom-right-radius: 0.25rem;
+}
+.form-check {
+    padding-top: 0.5rem;
+}
+.badge.text-decoration-none:hover {
+    opacity: 0.8;
+}
+.sortable-ghost {
+    opacity: 0.4;
+}
+.sortable-chosen {
+    background-color: #e3f2fd !important;
+}
+.drag-handle {
+    cursor: grab;
+    padding: 0.25rem;
+}
+.drag-handle:active {
+    cursor: grabbing;
+}
+tbody tr:hover .drag-handle {
+    color: #0d6efd !important;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tbody = document.querySelector('#categoriesTable tbody');
+    if (tbody) {
+        const sortable = Sortable.create(tbody, {
+            handle: '.drag-handle',
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            onEnd: function (evt) {
+                updateCategorySortOrder();
+            }
+        });
+    }
+
+    function updateCategorySortOrder() {
+        const rows = document.querySelectorAll('#categoriesTable tbody tr');
+        const updates = [];
+
+        rows.forEach((row, index) => {
+            const categoryId = row.getAttribute('data-category-id');
+            if (categoryId) {
+                updates.push({
+                    categoryId: parseInt(categoryId),
+                    newSortOrder: index + 1
+                });
+
+                const badge = row.querySelector('.badge.bg-secondary');
+                if (badge) {
+                    badge.textContent = index + 1;
+                }
+            }
+        });
+
+        const formData = new FormData();
+        formData.append('__RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]')?.value || '');
+        updates.forEach(update => {
+            formData.append('categoryIds', update.categoryId);
+            formData.append('sortOrders', update.newSortOrder);
+        });
+
+        fetch('@Url.Action("UpdateCategoriesSortOrder", "Links")', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showMessage('Categories reordered successfully!', 'success');
+            } else {
+                throw new Error(data.message || 'Failed to update sort order');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showMessage('Error updating sort order. Please refresh and try again.', 'error');
+        });
+    }
+
+    function showMessage(message, type) {
+        const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+        alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alertDiv);
+
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+});
+</script>

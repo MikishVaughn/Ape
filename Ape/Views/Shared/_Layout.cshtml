@@ -1,0 +1,31 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Ape</title>
+    <script type="importmap"></script>
+    <link rel="apple-touch-icon" sizes="180x180" href="~/lib/Icons/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="~/lib/Icons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="~/lib/Icons/favicon-16x16.png" />
+    <link rel="icon" type="image/x-icon" href="~/lib/Icons/favicon.ico" />
+    <link rel="manifest" href="~/lib/Icons/site.webmanifest" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Ape.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <partial name="_PartialHeader" />
+    <main role="main" class="pb-3">
+        @RenderBody()
+    </main>
+
+    <partial name="_PartialFooter" />
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,207 @@
+@page
+@model Ape.Areas.Identity.Pages.RoleManagementModel
+
+@{
+    ViewData["Title"] = "Manage Roles";
+}
+
+@if (User.IsInRole("Admin"))
+{
+    <div class="container my-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+
+                @if (!string.IsNullOrEmpty(Model.StatusMessage))
+                {
+                    var isError = Model.StatusMessage.StartsWith("Error");
+                    <div class="alert @(isError ? "alert-danger" : "alert-success") alert-dismissible fade show" role="alert">
+                        @Model.StatusMessage
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h1 class="mb-0 text-center">@ViewData["Title"]</h1>
+                    </div>
+
+                    <div class="card-body">
+
+                        <!-- Add Role -->
+                        <form method="post" asp-page-handler="Create" class="mb-4">
+                            @Html.AntiForgeryToken()
+                            <div class="input-group">
+                                <input type="text" name="roleName" class="form-control" placeholder="New role name" required />
+                                <button type="submit" class="btn btn-success">Add Role</button>
+                            </div>
+                        </form>
+
+                        <hr />
+
+                        <!-- Roles Table -->
+                        @if (Model.Roles.Any())
+                        {
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Role Name</th>
+                                        <th class="text-center" style="width: 100px;">Users</th>
+                                        <th class="text-end" style="width: 160px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var role in Model.Roles)
+                                    {
+                                        <tr>
+                                            <td>@role.Name</td>
+                                            <td class="text-center">
+                                                <span class="badge @(role.UserCount > 0 ? "bg-primary" : "bg-secondary")">
+                                                    @role.UserCount
+                                                </span>
+                                            </td>
+                                            <td class="text-end">
+                                                <button type="button"
+                                                        class="btn btn-sm btn-outline-primary"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#renameModal"
+                                                        data-role-id="@role.Id"
+                                                        data-role-name="@role.Name">
+                                                    Rename
+                                                </button>
+                                                @if (role.UserCount == 0)
+                                                {
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-outline-danger"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#deleteModal"
+                                                            data-role-id="@role.Id"
+                                                            data-role-name="@role.Name">
+                                                        Delete
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-outline-secondary"
+                                                            disabled
+                                                            title="Remove all users from this role before deleting">
+                                                        Delete
+                                                    </button>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <p class="text-muted text-center mb-0">No roles defined.</p>
+                        }
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Rename Modal -->
+    <div class="modal fade" id="renameModal" tabindex="-1" aria-labelledby="renameModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" asp-page-handler="Rename">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="roleId" id="renameRoleId" />
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="renameModalLabel">Rename Role</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Renaming role: <strong id="renameCurrentName"></strong></p>
+                        <div class="mb-3">
+                            <label for="newName" class="form-label">New Name</label>
+                            <input type="text" name="newName" id="renameNewName" class="form-control" required />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" asp-page-handler="Delete">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="roleId" id="deleteRoleId" />
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteModalLabel">Delete Role</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to delete the role <strong id="deleteRoleName"></strong>?</p>
+                        <p class="text-danger mb-0">This action cannot be undone.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="d-flex justify-content-center align-items-center container" style="min-height: 50vh;">
+        <div class="card rounded p-4 shadow" style="max-width: 400px;">
+            <div class="card-body rounded-2 text-center">
+                <p class="card-text pb-2">This is a secure admin area.</p>
+                <a class="nav-link text-black fs-3" asp-area="Identity" asp-page="/Account/Login">Login</a>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        // Rename modal - populate fields
+        var renameModal = document.getElementById('renameModal');
+        if (renameModal) {
+            renameModal.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget;
+                var roleId = button.getAttribute('data-role-id');
+                var roleName = button.getAttribute('data-role-name');
+
+                document.getElementById('renameRoleId').value = roleId;
+                document.getElementById('renameCurrentName').textContent = roleName;
+                document.getElementById('renameNewName').value = roleName;
+            });
+
+            renameModal.addEventListener('shown.bs.modal', function () {
+                var input = document.getElementById('renameNewName');
+                input.focus();
+                input.select();
+            });
+        }
+
+        // Delete modal - populate fields
+        var deleteModal = document.getElementById('deleteModal');
+        if (deleteModal) {
+            deleteModal.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget;
+                var roleId = button.getAttribute('data-role-id');
+                var roleName = button.getAttribute('data-role-name');
+
+                document.getElementById('deleteRoleId').value = roleId;
+                document.getElementById('deleteRoleName').textContent = roleName;
+            });
+        }
+    </script>
+}

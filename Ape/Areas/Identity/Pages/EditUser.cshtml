@@ -1,0 +1,601 @@
+@page
+@model Ape.Areas.Identity.Pages.EditUserModel
+
+@{
+    ViewData["Title"] = "Edit Member";
+}
+
+<h1 class="text-black my-4 text-center">@ViewData["Title"]</h1>
+
+<div class="container mb-4 px-2">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card p-2 shadow">
+
+                <div asp-validation-summary="ModelOnly" class="text-danger text-center" role="alert"></div>
+
+                <form method="post" id="editForm">
+
+                    <div class="d-flex flex-column flex-md-row justify-content-center gap-2 my-3" style="font-size: 0.875rem;">
+
+                        <!-- Cancel -->
+                        <button type="submit" asp-page-handler="Cancel" class="btn btn-sm btn-secondary rounded-2 shadow w-100 w-md-auto">
+                            Cancel
+                        </button>
+
+                        @{
+                            var editUserReturnUrl = Url.Page("/EditUser",
+                                new
+                                {
+                                    area = "Identity",
+                                    id = Model.Input.Id,
+                                    returnUrl = Model.ReturnUrl
+                                });
+                        }
+
+                        <!-- Roles -->
+                        <a asp-page="./ManageRoles"
+                           asp-route-userId="@Model.Input.Id"
+                           asp-route-returnUrl="@editUserReturnUrl"
+                           class="btn btn-sm btn-info rounded-2 shadow w-100 w-md-auto">
+                            Roles
+                        </a>
+
+                        @if (User.IsInRole("Admin"))
+                        {
+                            @if (Model.Input.IsActive)
+                            {
+                                <!-- Delete Button -->
+                                <button type="button" class="btn btn-sm btn-danger rounded-2 shadow w-100 w-md-auto" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">
+                                    Delete
+                                </button>
+
+                                <!-- Deactivate Button -->
+                                <button type="button" class="btn btn-sm btn-warning rounded-2 shadow w-100 w-md-auto" data-bs-toggle="modal" data-bs-target="#deactivateConfirmModal">
+                                    Deactivate
+                                </button>
+                            }
+                            else
+                            {
+                                <!-- Reactivate -->
+                                <button type="button" class="btn btn-sm btn-success rounded-2 shadow w-100 w-md-auto" onclick="confirmReactivate()">
+                                    Reactivate
+                                </button>
+                            }
+
+                            @if (Model.Input.IsLockedOut)
+                            {
+                                <button type="button" class="btn btn-sm btn-info rounded-2 shadow w-100 w-md-auto" onclick="confirmUnlock()">
+                                    Unlock Account
+                                </button>
+                            }
+                        }
+
+                        <!-- Save -->
+                        <button type="submit" class="btn btn-sm btn-success rounded-2 shadow w-100 w-md-auto">
+                            Save
+                        </button>
+
+                    </div>
+
+                    <!-- Hidden Fields -->
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="ReturnUrl" />
+                    <input type="hidden" asp-for="Input.Id" />
+                    <input type="hidden" asp-for="Input.UserName" />
+                    <input type="hidden" asp-for="Input.Email" id="hiddenEmail" />
+
+                    <!-- Deactivation Alert -->
+                    @if (!Model.Input.IsActive)
+                    {
+                        <div class="alert alert-warning mb-3" role="alert">
+                            <h6>Member Deactivated</h6>
+                            <p class="mb-1"><strong>Deactivated:</strong> @Model.Input.DeactivatedDate?.ToString("yyyy-MM-dd HH:mm")</p>
+                            <p class="mb-1"><strong>By:</strong> @Model.Input.DeactivatedBy</p>
+                            <p class="mb-0"><strong>Reason:</strong> @Model.Input.DeactivationReason</p>
+                        </div>
+                    }
+
+                    <!-- Lockout Alert -->
+                    @if (Model.Input.IsLockedOut)
+                    {
+                        <div class="alert alert-danger mb-3" role="alert">
+                            <h6>Account Locked Out</h6>
+                            <p class="mb-1"><strong>Reason:</strong> Too many failed login attempts</p>
+                            <p class="mb-0"><strong>Lockout Ends:</strong> @Model.Input.LockoutEnd?.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</p>
+                            <p class="mb-0 mt-2"><em>This user cannot log in until the lockout period ends or an admin unlocks the account.</em></p>
+                        </div>
+                    }
+
+                    <!-- Email (read-only) -->
+                    <div class="form-floating mb-3">
+                        <span class="text-black form-control email-display readonly-email shadow">@Model.Input.Email</span>
+                        <div class="email-icon-container" id="emailCheckIcon">
+                            &#10003;
+                        </div>
+                        <label asp-for="Input.Email" class="form-label">Email</label>
+                        <span asp-validation-for="Input.Email" class="text-danger"></span>
+                    </div>
+
+                    <!-- Email Confirmed -->
+                    <div class="form-check mb-3">
+                        <input asp-for="Input.EmailConfirmed" type="checkbox" class="form-check-input email-confirmed-checkbox shadow" id="emailConfirmedCheckbox" />
+                        <label class="form-check-label" for="emailConfirmedCheckbox">Email Confirmed</label>
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div class="form-floating mb-3">
+                        <input asp-for="Input.PhoneNumber" class="text-black form-control readonly-PhoneNumber shadow" id="phoneNumber" placeholder="Phone Number" />
+                        <div class="phoneNumber-icon-container" id="phoneNumberCheckIcon">
+                            &#10003;
+                        </div>
+                        <label asp-for="Input.PhoneNumber" class="text-black form-label">Cell Phone</label>
+                        <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+                    </div>
+
+                    <!-- Phone Confirmed -->
+                    <div class="form-check mb-3">
+                        <input asp-for="Input.PhoneNumberConfirmed" type="checkbox" class="form-check-input phoneNumber-confirmed-checkbox shadow" id="PhoneNumberConfirmedCheckbox" />
+                        <label class="form-check-label" for="PhoneNumberConfirmedCheckbox">Cell Phone Confirmed</label>
+                    </div>
+
+                    <!-- Home Phone -->
+                    <div class="form-floating mb-3">
+                        <input asp-for="Input.HomePhoneNumber" class="text-black form-control shadow" id="homephoneNumber" placeholder="Home Phone (Opt.)" />
+                        <label asp-for="Input.HomePhoneNumber" class="text-black form-label">Home Phone (Opt.)</label>
+                        <span asp-validation-for="Input.HomePhoneNumber" class="text-danger"></span>
+                    </div>
+
+                    <hr />
+
+                    <!-- First, Middle, Last Name -->
+                    <div class="row gx-1">
+                        <div class="col-5 form-floating mb-3">
+                            <input asp-for="Input.FirstName" class="text-black form-control shadow" placeholder="First Name" />
+                            <label asp-for="Input.FirstName" class="text-black form-label">First Name</label>
+                            <span asp-validation-for="Input.FirstName" class="text-danger"></span>
+                        </div>
+                        <div class="col-2 form-floating mb-3">
+                            <input asp-for="Input.MiddleName" class="text-black form-control shadow" placeholder="Middle" />
+                            <span asp-validation-for="Input.MiddleName" class="text-danger"></span>
+                        </div>
+                        <div class="col-5 form-floating mb-3">
+                            <input asp-for="Input.LastName" class="text-black form-control shadow" placeholder="Last Name" />
+                            <label asp-for="Input.LastName" class="text-black form-label">Last Name</label>
+                            <span asp-validation-for="Input.LastName" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Birthday / Anniversary -->
+                    <div class="row gx-1">
+                        <div class="col-6 form-floating mb-2">
+                            <input asp-for="Input.Birthday" class="text-black form-control shadow date-picker" type="text" placeholder="mm/dd/yyyy" readonly />
+                            <label asp-for="Input.Birthday" class="text-black form-label">Birthday</label>
+                            <span asp-validation-for="Input.Birthday" class="text-danger"></span>
+                        </div>
+                        <div class="col-6 form-floating mb-2">
+                            <input asp-for="Input.Anniversary" class="text-black form-control shadow date-picker" type="text" placeholder="mm/dd/yyyy" readonly />
+                            <label asp-for="Input.Anniversary" class="text-black form-label">Anniversary (Opt.)</label>
+                            <span asp-validation-for="Input.Anniversary" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <!-- Address Line 1 -->
+                    <div class="col-12 form-floating mb-3">
+                        <input asp-for="Input.AddressLine1" class="text-black form-control shadow" placeholder="Address Line 1 (Opt.)" />
+                        <label asp-for="Input.AddressLine1" class="text-black form-label">Address Line 1 (Opt.)</label>
+                        <span asp-validation-for="Input.AddressLine1" class="text-danger"></span>
+                    </div>
+
+                    <!-- Address Line 2 -->
+                    <div class="col-12 form-floating mb-3">
+                        <input asp-for="Input.AddressLine2" class="text-black form-control shadow" placeholder="Address Line 2 (Opt.)" />
+                        <label asp-for="Input.AddressLine2" class="text-black form-label">Address Line 2 (Opt.)</label>
+                        <span asp-validation-for="Input.AddressLine2" class="text-danger"></span>
+                    </div>
+
+                    <!-- City, State, Zip -->
+                    <div class="row gx-1">
+                        <div class="col-5 form-floating mb-3">
+                            <input asp-for="Input.City" class="text-black form-control shadow" placeholder="City (Opt.)" />
+                            <label asp-for="Input.City" class="text-black form-label">City (Opt.)</label>
+                            <span asp-validation-for="Input.City" class="text-danger"></span>
+                        </div>
+                        <div class="col-3 form-floating mb-3">
+                            <input asp-for="Input.State" class="text-black form-control shadow" placeholder="State (Opt.)" />
+                            <label asp-for="Input.State" class="text-black form-label">State (Opt.)</label>
+                            <span asp-validation-for="Input.State" class="text-danger"></span>
+                        </div>
+                        <div class="col-4 form-floating mb-3">
+                            <input asp-for="Input.ZipCode" class="text-black form-control shadow" placeholder="Zip (Opt.)" />
+                            <label asp-for="Input.ZipCode" class="text-black form-label">Zip (Opt.)</label>
+                            <span asp-validation-for="Input.ZipCode" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Two Factor Enabled -->
+                    <div class="col-6 mb-4">
+                        <div class="form-check mb-3">
+                            <input asp-for="Input.TwoFactorEnabled" type="checkbox" class="form-check-input twoFactorEnabled-checkbox shadow" id="twoFactorEnabledCheckbox" />
+                            <label class="form-check-label" asp-for="Input.TwoFactorEnabled"></label>
+                            <span asp-validation-for="Input.TwoFactorEnabled" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Deactivate Modal -->
+<div class="modal fade" id="deactivateConfirmModal" tabindex="-1" aria-labelledby="deactivateConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-warning text-dark border-0">
+                <h5 class="modal-title" id="deactivateConfirmModalLabel">Deactivate Member</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-4">
+                <h6 class="text-center mb-3">Are you sure you want to deactivate this member?</h6>
+                <div class="alert alert-info" role="alert">
+                    <strong>Note:</strong> Deactivated members will be locked out but their data will be preserved.
+                </div>
+                <p class="text-center text-muted mb-3">
+                    Member: <strong>@(Model.Input.FirstName + " " + Model.Input.LastName)</strong><br />
+                    Email: <strong>@Model.Input.Email</strong>
+                </p>
+
+                <div class="mb-3">
+                    <label for="deactivationReason" class="form-label">Reason for deactivation <span class="text-danger">*</span></label>
+                    <select class="form-select" id="deactivationReason" required>
+                        <option value="">Select a reason...</option>
+                        <option value="Member left">Member left</option>
+                        <option value="Violation of rules">Violation of rules</option>
+                        <option value="Inactive/Non-responsive">Inactive/Non-responsive</option>
+                        <option value="Duplicate account">Duplicate account</option>
+                        <option value="Administrative cleanup">Administrative cleanup</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="mb-3" id="customReasonContainer" style="display: none;">
+                    <label for="customDeactivationReason" class="form-label">Custom reason</label>
+                    <input type="text" class="form-control" id="customDeactivationReason" maxlength="250" placeholder="Enter custom reason...">
+                </div>
+            </div>
+            <div class="modal-footer border-0 justify-content-center">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-warning" id="confirmDeactivateBtn">Deactivate Member</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-danger text-white border-0">
+                <h5 class="modal-title" id="deleteConfirmModalLabel">Confirm Permanent Delete</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" asp-page-handler="Delete">
+                <input type="hidden" asp-for="Input.Id" />
+                <input type="hidden" asp-for="ReturnUrl" />
+                <div class="modal-body text-center py-4">
+                    <h6 class="mb-3">Are you absolutely sure you want to permanently delete this member?</h6>
+                    <div class="alert alert-warning" role="alert">
+                        <strong>Warning:</strong> This action cannot be undone. All member data will be permanently removed.
+                    </div>
+                    <p class="text-muted mb-0">
+                        Member: <strong>@(Model.Input.FirstName + " " + Model.Input.LastName)</strong><br />
+                        Email: <strong>@Model.Input.Email</strong>
+                    </p>
+                </div>
+                <div class="modal-footer border-0 justify-content-center">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Yes, Delete Member</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .readonly-email,
+        .readonly-PhoneNumber {
+            background-color: #f0f0f0;
+            cursor: not-allowed;
+            padding-right: 2.5em;
+            position: relative;
+        }
+
+        .email-icon-container,
+        .phoneNumber-icon-container {
+            position: absolute;
+            top: 50%;
+            right: 0.5em;
+            transform: translateY(-50%);
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .form-check-input[type=checkbox].twoFactorEnabled-checkbox,
+        .form-check-input[type=checkbox].email-confirmed-checkbox,
+        .form-check-input[type=checkbox].phoneNumber-confirmed-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            width: 1.2em;
+            height: 1.2em;
+            border: 1px solid #ccc;
+            border-radius: 0.2em;
+            outline: none;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .form-check-input[type=checkbox].twoFactorEnabled-checkbox:checked,
+        .form-check-input[type=checkbox].email-confirmed-checkbox:checked,
+        .form-check-input[type=checkbox].phoneNumber-confirmed-checkbox:checked {
+            background-color: #fff;
+            border-color: #28a745;
+        }
+
+        .form-check-input[type=checkbox].twoFactorEnabled-checkbox:checked::before,
+        .form-check-input[type=checkbox].email-confirmed-checkbox:checked::before,
+        .form-check-input[type=checkbox].phoneNumber-confirmed-checkbox:checked::before {
+            content: '\2713';
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1em;
+            color: #28a745;
+        }
+    </style>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <!-- jQuery UI for DatePicker -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/ui-lightness/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('.date-picker').datepicker({
+                dateFormat: 'mm/dd/yy',
+                changeMonth: true,
+                changeYear: true,
+                yearRange: '1920:2030',
+                showButtonPanel: true,
+                maxDate: new Date(2030, 11, 31),
+                minDate: new Date(1920, 0, 1),
+                onSelect: function (dateText, inst) {
+                    const date = $(this).datepicker('getDate');
+                    if (date) {
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
+                        $(this).val(month + '/' + day + '/' + year);
+                    }
+                }
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const hiddenEmail = document.getElementById('hiddenEmail');
+            const editForm = document.getElementById('editForm');
+            const emailConfirmedCheckbox = document.getElementById('emailConfirmedCheckbox');
+            const emailCheckIcon = document.getElementById('emailCheckIcon');
+            const phoneNumberInput = document.getElementById('phoneNumber');
+            const homephoneNumberInput = document.getElementById('homephoneNumber');
+            const phoneNumberConfirmedCheckbox = document.getElementById('PhoneNumberConfirmedCheckbox');
+            const phoneNumberCheckIcon = document.getElementById('phoneNumberCheckIcon');
+            const twoFactorEnabledCheckbox = document.getElementById('twoFactorEnabledCheckbox');
+
+            const firstNameInput = document.getElementById('Input_FirstName');
+            const middleNameInput = document.getElementById('Input_MiddleName');
+            const lastNameInput = document.getElementById('Input_LastName');
+            const cityInput = document.getElementById('Input_City');
+            const stateInput = document.getElementById('Input_State');
+
+            // Phone auto-format
+            function formatPhoneNumber(input) {
+                const cleaned = ('' + input.value).replace(/\D/g, '');
+                let formatted = '';
+                if (cleaned.length > 0) {
+                    formatted = '(' + cleaned.substring(0, 3);
+                    if (cleaned.length > 3) {
+                        formatted += ') ' + cleaned.substring(3, 6);
+                    }
+                    if (cleaned.length > 6) {
+                        formatted += '-' + cleaned.substring(6, 10);
+                    }
+                }
+                input.value = formatted;
+            }
+
+            if (phoneNumberInput) {
+                phoneNumberInput.addEventListener('input', function () { formatPhoneNumber(this); });
+                phoneNumberInput.addEventListener('paste', function () { setTimeout(() => formatPhoneNumber(this), 0); });
+            }
+            if (homephoneNumberInput) {
+                homephoneNumberInput.addEventListener('input', function () { formatPhoneNumber(this); });
+                homephoneNumberInput.addEventListener('paste', function () { setTimeout(() => formatPhoneNumber(this), 0); });
+            }
+
+            // Email confirmed icon toggle
+            function toggleEmailCheckIcon() {
+                if (emailCheckIcon && emailConfirmedCheckbox) {
+                    emailCheckIcon.style.display = emailConfirmedCheckbox.checked ? 'block' : 'none';
+                }
+            }
+            toggleEmailCheckIcon();
+            if (emailConfirmedCheckbox) {
+                emailConfirmedCheckbox.addEventListener('change', toggleEmailCheckIcon);
+            }
+
+            // Phone confirmed icon toggle
+            function togglePhoneNumberCheckIcon() {
+                if (phoneNumberCheckIcon && phoneNumberConfirmedCheckbox) {
+                    phoneNumberCheckIcon.style.display = phoneNumberConfirmedCheckbox.checked ? 'block' : 'none';
+                }
+            }
+            togglePhoneNumberCheckIcon();
+            if (phoneNumberConfirmedCheckbox) {
+                phoneNumberConfirmedCheckbox.addEventListener('change', togglePhoneNumberCheckIcon);
+            }
+
+            // Phone confirmed depends on phone having a value
+            if (phoneNumberInput && phoneNumberConfirmedCheckbox) {
+                function updatePhoneNumberConfirmedState() {
+                    const phoneValue = phoneNumberInput.value.trim().replace(/\D/g, '');
+                    phoneNumberConfirmedCheckbox.disabled = phoneValue === '';
+                    if (phoneValue === '') {
+                        phoneNumberConfirmedCheckbox.checked = false;
+                        if (phoneNumberCheckIcon) phoneNumberCheckIcon.style.display = 'none';
+                    }
+                }
+                updatePhoneNumberConfirmedState();
+                phoneNumberInput.addEventListener('input', updatePhoneNumberConfirmedState);
+            }
+
+            // Name capitalization
+            function capitalizeFirstLetter(input) {
+                if (input.value.length > 0) {
+                    input.value = input.value.charAt(0).toUpperCase() + input.value.slice(1);
+                }
+            }
+
+            if (firstNameInput) firstNameInput.addEventListener('input', function () { capitalizeFirstLetter(this); });
+            if (middleNameInput) middleNameInput.addEventListener('input', function () { capitalizeFirstLetter(this); });
+            if (lastNameInput) lastNameInput.addEventListener('input', function () { capitalizeFirstLetter(this); });
+            if (cityInput) cityInput.addEventListener('input', function () { capitalizeFirstLetter(this); });
+            if (stateInput) {
+                stateInput.addEventListener('input', function () {
+                    this.value = this.value.substring(0, 2).toUpperCase();
+                });
+            }
+
+            // Update hidden email before submit
+            if (editForm) {
+                editForm.addEventListener('submit', function () {
+                    if (hiddenEmail) {
+                        const emailSpan = document.querySelector('.email-display');
+                        if (emailSpan) {
+                            hiddenEmail.value = emailSpan.textContent.trim();
+                        }
+                    }
+                });
+            }
+
+            // 2FA checkbox logic
+            if (twoFactorEnabledCheckbox) {
+                const initialTwoFactorState = twoFactorEnabledCheckbox.checked;
+                if (!initialTwoFactorState) {
+                    twoFactorEnabledCheckbox.disabled = true;
+                } else {
+                    let hasBeenUnchecked = false;
+                    twoFactorEnabledCheckbox.addEventListener('click', function (e) {
+                        if (!twoFactorEnabledCheckbox.checked) {
+                            hasBeenUnchecked = true;
+                        } else if (hasBeenUnchecked && twoFactorEnabledCheckbox.checked) {
+                            e.preventDefault();
+                        }
+                    });
+                }
+            }
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const confirmDeactivateBtn = document.getElementById('confirmDeactivateBtn');
+            const editForm = document.getElementById('editForm');
+            const deactivationReasonSelect = document.getElementById('deactivationReason');
+            const customReasonContainer = document.getElementById('customReasonContainer');
+            const customReasonInput = document.getElementById('customDeactivationReason');
+
+            // Deactivation reason dropdown
+            if (deactivationReasonSelect && customReasonContainer && customReasonInput) {
+                deactivationReasonSelect.addEventListener('change', function () {
+                    if (this.value === 'Other') {
+                        customReasonContainer.style.display = 'block';
+                        customReasonInput.required = true;
+                    } else {
+                        customReasonContainer.style.display = 'none';
+                        customReasonInput.required = false;
+                        customReasonInput.value = '';
+                    }
+                });
+            }
+
+            // Deactivation confirmation
+            if (confirmDeactivateBtn && editForm) {
+                confirmDeactivateBtn.addEventListener('click', function () {
+                    const reason = deactivationReasonSelect.value;
+                    const customReason = customReasonInput.value;
+
+                    if (!reason) {
+                        alert('Please select a reason for deactivation.');
+                        return;
+                    }
+                    if (reason === 'Other' && !customReason.trim()) {
+                        alert('Please enter a custom reason for deactivation.');
+                        return;
+                    }
+
+                    const finalReason = reason === 'Other' ? customReason.trim() : reason;
+
+                    var modal = bootstrap.Modal.getInstance(document.getElementById('deactivateConfirmModal'));
+                    modal.hide();
+
+                    var reasonInput = document.createElement('input');
+                    reasonInput.type = 'hidden';
+                    reasonInput.name = 'reason';
+                    reasonInput.value = finalReason;
+                    editForm.appendChild(reasonInput);
+
+                    var currentAction = editForm.action || window.location.pathname;
+                    var separator = currentAction.includes('?') ? '&' : '?';
+                    editForm.action = currentAction + separator + 'handler=Deactivate';
+                    editForm.submit();
+                });
+            }
+        });
+
+        function confirmReactivate() {
+            if (confirm('Are you sure you want to reactivate this member? They will regain access to the system.')) {
+                var editForm = document.getElementById('editForm');
+                if (editForm) {
+                    var currentAction = editForm.action || window.location.pathname;
+                    var separator = currentAction.includes('?') ? '&' : '?';
+                    editForm.action = currentAction + separator + 'handler=Reactivate';
+                    editForm.submit();
+                }
+            }
+        }
+
+        function confirmUnlock() {
+            if (confirm('Are you sure you want to unlock this account? The user will be able to log in immediately.')) {
+                var editForm = document.getElementById('editForm');
+                if (editForm) {
+                    var currentAction = editForm.action || window.location.pathname;
+                    var separator = currentAction.includes('?') ? '&' : '?';
+                    editForm.action = currentAction + separator + 'handler=Unlock';
+                    editForm.submit();
+                }
+            }
+        }
+    </script>
+}

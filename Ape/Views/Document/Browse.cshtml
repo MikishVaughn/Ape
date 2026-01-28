@@ -1,0 +1,988 @@
+@model Ape.Models.ViewModels.DocumentExplorerViewModel
+@using Ape.Models
+
+@{
+    ViewData["Title"] = "Document Library";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Page Header -->
+<div class="mb-4 mt-4">
+    <div class="text-center">
+        <h2>Document Library</h2>
+    </div>
+    <div class="text-center">
+        <p>Browse and manage organizational documents</p>
+    </div>
+</div>
+
+<!-- Success/Error Messages -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="row">
+    <!-- Sidebar: Folder Tree -->
+    <div class="col-md-3 col-lg-2">
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-secondary text-white py-2">
+                <strong>Folders</strong>
+            </div>
+            <div class="card-body p-2" id="folderTreeContainer">
+                @await Html.PartialAsync("_FolderTree", Model.FolderTree)
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="col-md-9 col-lg-10">
+        <div class="card shadow">
+            <!-- Breadcrumb Navigation -->
+            <div class="card-header bg-light py-2">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        @foreach (var crumb in Model.Breadcrumbs)
+                        {
+                            if (crumb.IsCurrent)
+                            {
+                                <li class="breadcrumb-item active" aria-current="page">@crumb.Name</li>
+                            }
+                            else
+                            {
+                                <li class="breadcrumb-item">
+                                    <a href="@Url.Action("Browse", "Document", new { folderId = crumb.FolderId })">@crumb.Name</a>
+                                </li>
+                            }
+                        }
+                    </ol>
+                </nav>
+            </div>
+
+            <!-- Folder Header with Actions -->
+            <div class="card-body border-bottom py-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-0">
+                            @Model.CurrentFolderName
+                            @if (Model.CurrentFolderAccessLevel.HasValue && Model.CurrentFolderAccessLevel.Value > DocumentAccessLevel.Member)
+                            {
+                                <span class="badge bg-warning text-dark ms-2" title="Restricted Access">
+                                    Admin Only
+                                </span>
+                            }
+                        </h5>
+                    </div>
+                    @if (Model.CanManageFolders || Model.CanManageFiles)
+                    {
+                        <div class="btn-group">
+                            @if (Model.CanManageFolders)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#createFolderModal">
+                                    + New Folder
+                                </button>
+                            }
+                            @if (Model.CanManageFiles && Model.CurrentFolderId.HasValue)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#uploadFileModal">
+                                    + Upload File
+                                </button>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Folders Grid -->
+            @if (Model.Folders.Any())
+            {
+                <div class="card-body border-bottom py-3">
+                    <h6 class="text-muted mb-2">Folders</h6>
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3" id="foldersGrid">
+                        @foreach (var folder in Model.Folders)
+                        {
+                            <div class="col folder-item" data-folder-id="@folder.FolderId">
+
+                                <div class="card h-100 folder-card @(folder.AccessLevel > DocumentAccessLevel.Member ? "border-warning" : "")">
+                                    <a href="@Url.Action("Browse", "Document", new { folderId = folder.FolderId })" class="text-decoration-none">
+                                        <div class="card-body rounded text-center py-3">
+                                            <div class="folder-icon mb-2">
+                                                @if (folder.AccessLevel > DocumentAccessLevel.Member)
+                                                {
+                                                    <span style="font-size: 2rem;">&#128274;</span>
+                                                }
+                                                else
+                                                {
+                                                    <span style="font-size: 2rem;">&#128193;</span>
+                                                }
+                                            </div>
+                                            <div class="folder-name text-truncate" title="@folder.Name">@folder.Name</div>
+                                            <span class="text-muted small">@folder.FileCount files</span>
+                                        </div>
+                                    </a>
+                                    @if (Model.CanManageFolders)
+                                    {
+                                        <div class="card-footer bg-transparent border-0 py-1">
+                                            <div class="row row-cols-2 g-3">
+                                                <button type="button" class="btn btn-outline-secondary btn-edit-folder"
+                                                        onclick="showEditFolderModal(@folder.FolderId, '@folder.Name.Replace("'", "\\'")', @((int)folder.AccessLevel));">
+                                                    ✏️ Edit
+                                                </button>
+                                                <button type="button" class="btn btn-outline-danger btn-delete-folder"
+                                                        onclick="confirmDeleteFolder(@folder.FolderId, '@folder.Name.Replace("'", "\\'")');">
+                                                    🗑️ Delete
+                                                </button>
+                                            </div>
+                                        </div>
+                                    }
+
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Files Grid -->
+            @if (Model.CurrentFolderId.HasValue)
+            {
+                <div class="card-body py-3">
+                    <h6 class="text-muted mb-2">Files</h6>
+                    @if (Model.Files.Any())
+                    {
+                        @if (Model.CanManageFiles)
+                        {
+                            <div class="mb-2 d-none" id="bulkActionsBar">
+                                <span class="text-muted me-2"><span id="selectedCount">0</span> file(s) selected</span>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="showBulkMoveModal()">
+                                    Move Selected
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary ms-1" onclick="clearSelection()">
+                                    Clear Selection
+                                </button>
+                            </div>
+                        }
+                        <div class="table-responsive" style="min-height:350px;">
+                            <table class="table table-hover table-striped mb-0" id="filesTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        @if (Model.CanManageFiles)
+                                        {
+                                            <th style="width: 30px;">
+                                                <input type="checkbox" class="form-check-input" id="selectAllFiles" title="Select all" onclick="toggleSelectAll(this)">
+                                            </th>
+                                            <th style="width: 30px;"></th>
+                                        }
+                                        <th>File Name</th>
+                                        @if (Model.CanManageFiles)
+                                        {
+                                            <th style="width: 100px;">Actions</th>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody id="filesTableBody">
+                                    @foreach (var file in Model.Files)
+                                    {
+                                        <tr data-file-id="@file.FileId">
+                                            @if (Model.CanManageFiles)
+                                            {
+                                                <td class="text-center">
+                                                    <input type="checkbox" class="form-check-input file-checkbox" value="@file.FileId" onclick="updateSelection()">
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="drag-handle" title="Drag to reorder">&#8942;</span>
+                                                </td>
+                                            }
+                                            <td>
+                                                <a href="@Url.Action("ViewPdf", "Document", new { fileId = file.FileId })" class="text-decoration-none">
+                                                    <span class="me-2 pdf-icon">📃</span>@System.IO.Path.GetFileNameWithoutExtension(file.FileName)
+                                                </a>
+                                            </td>
+                                            @if (Model.CanManageFiles)
+                                            {
+                                                <td>
+                                                    <div class="dropdown">
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            Actions
+                                                        </button>
+                                                        <ul class="dropdown-menu dropdown-menu-end">
+                                                            <li>
+                                                                <a class="dropdown-item" href="#" onclick="showEditFileModal(@file.FileId, '@file.FileName.Replace("'", "\\'")'); return false;">
+                                                                    ✏️ Rename
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <a class="dropdown-item" href="#" onclick="showMoveFileModal(@file.FileId, '@file.FileName.Replace("'", "\\'")', @file.FolderId); return false;">
+                                                                    ➡️ Move
+                                                                </a>
+                                                            </li>
+                                                            <li><hr class="dropdown-divider"></li>
+                                                            <li>
+                                                                <a class="dropdown-item text-danger" href="#" onclick="confirmDeleteFile(@file.FileId, '@file.FileName.Replace("'", "\\'")', @file.FolderId); return false;">
+                                                                    🗑️ Delete
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-4">
+                            <div style="font-size: 3rem;">&#128193;</div>
+                            <p class="mb-0">This folder is empty</p>
+                            @if (Model.CanManageFiles)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-success mt-2" data-bs-toggle="modal" data-bs-target="#uploadFileModal">
+                                    Upload a file
+                                </button>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="card-body py-3 text-center text-muted">
+                    <p class="mb-0">Select a folder to view its contents</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Create Folder Modal -->
+<div class="modal fade" id="createFolderModal" tabindex="-1" aria-labelledby="createFolderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="CreateFolderForm" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="parentFolderId" value="@Model.CurrentFolderId" />
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createFolderModalLabel">Create New Folder</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="folderName" class="form-label">Folder Name</label>
+                        <input type="text" class="form-control" id="folderName" name="folderName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="accessLevel" class="form-label">Access Level</label>
+                        <select class="form-select" id="accessLevel" name="accessLevel">
+                            <option value="0">Member (All users)</option>
+                            <option value="1">Admin Only</option>
+                        </select>
+                        <div class="form-text">Controls who can view this folder and its contents.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Folder</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Upload File Modal -->
+<div class="modal fade" id="uploadFileModal" tabindex="-1" aria-labelledby="uploadFileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="UploadFile" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="folderId" value="@Model.CurrentFolderId" />
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadFileModalLabel">Upload File</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Select PDF File</label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".pdf" required>
+                        <div class="form-text">Only PDF files are allowed.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Folder Modal -->
+<div class="modal fade" id="editFolderModal" tabindex="-1" aria-labelledby="editFolderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editFolderModalLabel">✏️ Edit Folder</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editFolderId" />
+                <div class="mb-3">
+                    <label for="editFolderName" class="form-label">Folder Name</label>
+                    <input type="text" class="form-control" id="editFolderName" required>
+                </div>
+                <div class="mb-3">
+                    <label for="editAccessLevel" class="form-label">Access Level</label>
+                    <select class="form-select" id="editAccessLevel">
+                        <option value="0">Member (All users)</option>
+                        <option value="1">Admin Only</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveFolder()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit File Modal -->
+<div class="modal fade" id="editFileModal" tabindex="-1" aria-labelledby="editFileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editFileModalLabel">Rename File</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editFileId" />
+                <div class="mb-3">
+                    <label for="editFileName" class="form-label">File Name</label>
+                    <input type="text" class="form-control" id="editFileName" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveFile()">Rename</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Move File Modal -->
+<div class="modal fade" id="moveFileModal" tabindex="-1" aria-labelledby="moveFileModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="moveFileModalLabel">Move File</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="moveFileId" />
+                <input type="hidden" id="moveFileCurrentFolder" />
+                <p>Moving: <strong id="moveFileName"></strong></p>
+                <div class="mb-3">
+                    <label for="targetFolderId" class="form-label">Select Target Folder</label>
+                    <select class="form-select" id="targetFolderId"></select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="moveFile()">Move File</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Move Files Modal -->
+<div class="modal fade" id="bulkMoveModal" tabindex="-1" aria-labelledby="bulkMoveModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bulkMoveModalLabel">Move Selected Files</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Moving <strong id="bulkMoveCount">0</strong> file(s)</p>
+                <div class="mb-3">
+                    <label for="bulkTargetFolderId" class="form-label">Select Target Folder</label>
+                    <select class="form-select" id="bulkTargetFolderId"></select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="bulkMoveFiles()">Move Files</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Action Modal -->
+<div class="modal fade" id="confirmActionModal" tabindex="-1" aria-labelledby="confirmActionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmActionModalLabel">Confirm Action</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="confirmActionBody">
+                Are you sure?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmActionBtn" onclick="">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script>
+        // CSRF Token for AJAX requests
+        const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+
+        // ============================================================
+        // Confirm Action Modal
+        // ============================================================
+
+        let confirmCallback = null;
+
+        function showConfirmModal(message, callback, options = {}) {
+            const modal = document.getElementById('confirmActionModal');
+            document.getElementById('confirmActionBody').innerHTML = message;
+            document.getElementById('confirmActionModalLabel').textContent = options.title || 'Confirm Action';
+
+            const confirmBtn = document.getElementById('confirmActionBtn');
+            confirmBtn.textContent = options.confirmText || 'Confirm';
+            confirmBtn.className = 'btn ' + (options.confirmClass || 'btn-danger');
+
+            confirmCallback = callback;
+            confirmBtn.onclick = function () {
+                bootstrap.Modal.getInstance(modal).hide();
+                if (confirmCallback) confirmCallback();
+            };
+
+            new bootstrap.Modal(modal).show();
+        }
+
+        // ============================================================
+        // Folder Operations
+        // ============================================================
+
+        // Show edit folder modal
+        function showEditFolderModal(folderId, folderName, accessLevel) {
+            document.getElementById('editFolderId').value = folderId;
+            document.getElementById('editFolderName').value = folderName;
+            document.getElementById('editAccessLevel').value = accessLevel;
+            new bootstrap.Modal(document.getElementById('editFolderModal')).show();
+        }
+
+        // Save folder changes
+        function saveFolder() {
+            const folderId = document.getElementById('editFolderId').value;
+            const newName = document.getElementById('editFolderName').value.trim();
+            const accessLevel = document.getElementById('editAccessLevel').value;
+
+            if (!newName) {
+                alert('Folder name is required.');
+                return;
+            }
+
+            // Rename folder
+            const renameData = new FormData();
+            renameData.append('folderId', folderId);
+            renameData.append('newName', newName);
+            renameData.append('__RequestVerificationToken', csrfToken);
+
+            fetch('@Url.Action("RenameFolder", "Document")', {
+                method: 'POST',
+                body: renameData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update access level
+                    const accessData = new FormData();
+                    accessData.append('folderId', folderId);
+                    accessData.append('accessLevel', accessLevel);
+                    accessData.append('__RequestVerificationToken', csrfToken);
+
+                    return fetch('@Url.Action("UpdateFolderAccessLevel", "Document")', {
+                        method: 'POST',
+                        body: accessData
+                    });
+                }
+                throw new Error(data.message);
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    throw new Error(data.message);
+                }
+            })
+            .catch(error => {
+                alert('Error: ' + error.message);
+            });
+        }
+
+        // Confirm delete folder
+        function confirmDeleteFolder(folderId, folderName) {
+            showConfirmModal(
+                `Are you sure you want to delete the folder "<strong>${folderName}</strong>"?<br><br>If the folder contains files or subfolders, they will also be deleted.`,
+                function() {
+                    deleteFolder(folderId);
+                },
+                { title: 'Delete Folder', confirmText: 'Delete', confirmClass: 'btn-danger' }
+            );
+        }
+
+        // Delete folder
+        function deleteFolder(folderId) {
+            const formData = new FormData();
+            formData.append('folderId', folderId);
+            formData.append('deleteContents', 'true');
+            formData.append('__RequestVerificationToken', csrfToken);
+
+            fetch('@Url.Action("DeleteFolder", "Document")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Error deleting folder.');
+            });
+        }
+
+        // ============================================================
+        // File Operations
+        // ============================================================
+
+        // Show edit file modal
+        function showEditFileModal(fileId, fileName) {
+            document.getElementById('editFileId').value = fileId;
+            // Strip .pdf extension for display
+            const nameWithoutExt = fileName.toLowerCase().endsWith('.pdf')
+                ? fileName.substring(0, fileName.length - 4)
+                : fileName;
+            document.getElementById('editFileName').value = nameWithoutExt;
+            new bootstrap.Modal(document.getElementById('editFileModal')).show();
+        }
+
+        // Save file changes
+        function saveFile() {
+            const fileId = document.getElementById('editFileId').value;
+            let newFileName = document.getElementById('editFileName').value.trim();
+
+            if (!newFileName) {
+                alert('File name is required.');
+                return;
+            }
+
+            // Automatically append .pdf if not present
+            if (!newFileName.toLowerCase().endsWith('.pdf')) {
+                newFileName += '.pdf';
+            }
+
+            // Rename file
+            const renameData = new FormData();
+            renameData.append('fileId', fileId);
+            renameData.append('newFileName', newFileName);
+            renameData.append('__RequestVerificationToken', csrfToken);
+
+            fetch('@Url.Action("RenameFile", "Document")', {
+                method: 'POST',
+                body: renameData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Error: ' + error.message);
+            });
+        }
+
+        // Show move file modal
+        function showMoveFileModal(fileId, fileName, currentFolderId) {
+            document.getElementById('moveFileId').value = fileId;
+            document.getElementById('moveFileName').textContent = fileName;
+            document.getElementById('moveFileCurrentFolder').value = currentFolderId;
+
+            // Load available folders
+            fetch('@Url.Action("GetFolderTree", "Document")')
+                .then(response => response.json())
+                .then(tree => {
+                    const select = document.getElementById('targetFolderId');
+                    select.innerHTML = '';
+
+                    function addOptions(nodes, level = 0) {
+                        nodes.forEach(node => {
+                            const option = document.createElement('option');
+                            option.value = node.folderId;
+                            option.textContent = '\u00A0\u00A0'.repeat(level) + node.name;
+                            if (node.folderId == currentFolderId) {
+                                option.disabled = true;
+                                option.textContent += ' (current)';
+                            }
+                            select.appendChild(option);
+                            if (node.children && node.children.length) {
+                                addOptions(node.children, level + 1);
+                            }
+                        });
+                    }
+
+                    addOptions(tree);
+                    new bootstrap.Modal(document.getElementById('moveFileModal')).show();
+                });
+        }
+
+        // Move file
+        function moveFile() {
+            const fileId = document.getElementById('moveFileId').value;
+            const targetFolderId = document.getElementById('targetFolderId').value;
+
+            const formData = new FormData();
+            formData.append('fileId', fileId);
+            formData.append('targetFolderId', targetFolderId);
+            formData.append('__RequestVerificationToken', csrfToken);
+
+            fetch('@Url.Action("MoveFile", "Document")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Error moving file.');
+            });
+        }
+
+        // Confirm delete file
+        function confirmDeleteFile(fileId, fileName, folderId) {
+            showConfirmModal(
+                `Are you sure you want to delete the file "<strong>${fileName}</strong>"?<br><br>This action cannot be undone.`,
+                function() {
+                    deleteFile(fileId, folderId);
+                },
+                { title: 'Delete File', confirmText: 'Delete', confirmClass: 'btn-danger' }
+            );
+        }
+
+        // Delete file
+        function deleteFile(fileId, folderId) {
+            const formData = new FormData();
+            formData.append('fileId', fileId);
+            formData.append('folderId', folderId);
+            formData.append('__RequestVerificationToken', csrfToken);
+
+            fetch('@Url.Action("DeleteFile", "Document")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Error deleting file.');
+            });
+        }
+
+        // ============================================================
+        // Drag-and-Drop Sort Order
+        // ============================================================
+
+        // Initialize drag-and-drop for files
+        document.addEventListener('DOMContentLoaded', function() {
+            const filesTableBody = document.getElementById('filesTableBody');
+            if (filesTableBody) {
+                Sortable.create(filesTableBody, {
+                    handle: '.drag-handle',
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    onEnd: function(evt) {
+                        updateFileSortOrder();
+                    }
+                });
+            }
+        });
+
+        function updateFileSortOrder() {
+            const rows = document.querySelectorAll('#filesTableBody tr');
+            const fileIds = [];
+            const sortOrders = [];
+
+            rows.forEach((row, index) => {
+                const fileId = row.getAttribute('data-file-id');
+                if (fileId) {
+                    fileIds.push(parseInt(fileId));
+                    sortOrders.push(index + 1);
+                }
+            });
+
+            const formData = new FormData();
+            fileIds.forEach(id => formData.append('fileIds', id));
+            sortOrders.forEach(order => formData.append('sortOrders', order));
+            formData.append('__RequestVerificationToken', csrfToken);
+
+            fetch('@Url.Action("UpdateFileSortOrder", "Document")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    console.error('Error updating sort order:', data.message);
+                }
+            });
+        }
+
+        // ============================================================
+        // Multi-select file operations
+        // ============================================================
+
+        // Get all selected file IDs
+        function getSelectedFileIds() {
+            const checkboxes = document.querySelectorAll('.file-checkbox:checked');
+            return Array.from(checkboxes).map(cb => parseInt(cb.value));
+        }
+
+        // Update selection count and show/hide bulk actions bar
+        function updateSelection() {
+            const selectedIds = getSelectedFileIds();
+            const count = selectedIds.length;
+            const bulkBar = document.getElementById('bulkActionsBar');
+            const countSpan = document.getElementById('selectedCount');
+            const selectAllCheckbox = document.getElementById('selectAllFiles');
+
+            if (countSpan) countSpan.textContent = count;
+
+            if (bulkBar) {
+                if (count > 0) {
+                    bulkBar.classList.remove('d-none');
+                } else {
+                    bulkBar.classList.add('d-none');
+                }
+            }
+
+            // Update "select all" checkbox state
+            if (selectAllCheckbox) {
+                const allCheckboxes = document.querySelectorAll('.file-checkbox');
+                selectAllCheckbox.checked = allCheckboxes.length > 0 && allCheckboxes.length === count;
+                selectAllCheckbox.indeterminate = count > 0 && count < allCheckboxes.length;
+            }
+        }
+
+        // Toggle select all checkboxes
+        function toggleSelectAll(checkbox) {
+            const allCheckboxes = document.querySelectorAll('.file-checkbox');
+            allCheckboxes.forEach(cb => cb.checked = checkbox.checked);
+            updateSelection();
+        }
+
+        // Clear all selections
+        function clearSelection() {
+            const allCheckboxes = document.querySelectorAll('.file-checkbox');
+            allCheckboxes.forEach(cb => cb.checked = false);
+            const selectAllCheckbox = document.getElementById('selectAllFiles');
+            if (selectAllCheckbox) selectAllCheckbox.checked = false;
+            updateSelection();
+        }
+
+        // Show bulk move modal
+        function showBulkMoveModal() {
+            const selectedIds = getSelectedFileIds();
+            if (selectedIds.length === 0) {
+                alert('Please select at least one file.');
+                return;
+            }
+
+            document.getElementById('bulkMoveCount').textContent = selectedIds.length;
+
+            // Load available folders
+            const currentFolderId = @(Model.CurrentFolderId ?? 0);
+            fetch('@Url.Action("GetFolderTree", "Document")')
+                .then(response => response.json())
+                .then(tree => {
+                    const select = document.getElementById('bulkTargetFolderId');
+                    select.innerHTML = '';
+
+                    function addOptions(nodes, level = 0) {
+                        nodes.forEach(node => {
+                            const option = document.createElement('option');
+                            option.value = node.folderId;
+                            option.textContent = '\u00A0\u00A0'.repeat(level) + node.name;
+                            if (node.folderId == currentFolderId) {
+                                option.disabled = true;
+                                option.textContent += ' (current)';
+                            }
+                            select.appendChild(option);
+                            if (node.children && node.children.length) {
+                                addOptions(node.children, level + 1);
+                            }
+                        });
+                    }
+
+                    addOptions(tree);
+                    new bootstrap.Modal(document.getElementById('bulkMoveModal')).show();
+                });
+        }
+
+        // Execute bulk move
+        function bulkMoveFiles() {
+            const selectedIds = getSelectedFileIds();
+            const targetFolderId = document.getElementById('bulkTargetFolderId').value;
+
+            if (selectedIds.length === 0) {
+                alert('No files selected.');
+                return;
+            }
+
+            const formData = new FormData();
+            selectedIds.forEach(id => formData.append('fileIds', id));
+            formData.append('targetFolderId', targetFolderId);
+            formData.append('__RequestVerificationToken', csrfToken);
+
+            fetch('@Url.Action("MoveFiles", "Document")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Error moving files.');
+            });
+        }
+    </script>
+
+    <style>
+        .folder-card {
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .folder-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .folder-card.border-warning {
+            border-width: 2px !important;
+        }
+        .folder-name {
+            font-weight: 500;
+            color: #333;
+        }
+        .drag-handle {
+            cursor: grab;
+            color: #999;
+            font-size: 1.2rem;
+        }
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+        .sortable-ghost {
+            opacity: 0.4;
+        }
+        #folderTreeContainer {
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
+        }
+        /* Make checked checkboxes more visible */
+        .form-check-input.file-checkbox:checked,
+        .form-check-input#selectAllFiles:checked {
+            background-color: #0b5ed7 !important;
+            border-color: #0b5ed7 !important;
+        }
+        .form-check-input.file-checkbox,
+        .form-check-input#selectAllFiles {
+            width: 1.2em;
+            height: 1.2em;
+            cursor: pointer;
+            border: 2px solid #6c757d;
+        }
+        .form-check-input.file-checkbox:focus,
+        .form-check-input#selectAllFiles:focus {
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+        /* PDF file icon styling */
+        .pdf-icon {
+            font-size: 1.4rem;
+            vertical-align: middle;
+        }
+
+        /* Mobile responsive styles */
+        @@media (max-width: 576px) {
+            /* Stack folder action buttons vertically */
+            .folder-card .card-footer .btn-group {
+                flex-direction: column;
+                width: 100%;
+            }
+            .folder-card .card-footer .btn-group .btn {
+                border-radius: 4px !important;
+                margin-bottom: 2px;
+                white-space: nowrap;
+                width: 100%;
+            }
+            .folder-card .card-footer .btn-group .btn:last-child {
+                margin-bottom: 0;
+            }
+            /* Stack header action buttons */
+            .card-body .btn-group {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+            .card-body .btn-group .btn {
+                border-radius: 4px !important;
+                white-space: nowrap;
+            }
+            /* Hide sidebar on mobile - show only main content */
+            .col-md-3.col-lg-2 {
+                display: none;
+            }
+            .col-md-9.col-lg-10 {
+                width: 100%;
+            }
+        }
+    </style>
+}

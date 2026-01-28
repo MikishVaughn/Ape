@@ -1,0 +1,91 @@
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject Ape.Services.SecureConfigurationService ConfigService
+
+@{
+    string siteName = await ConfigService.GetCredentialAsync("SITE_NAME") ?? "Ape";
+}
+
+<div id="footer" class="navbar navbar-dark bg-dark border-top" role="contentinfo" aria-label="Site footer">
+
+    <div class="container text-left">
+        <div class="row w-100 gx-0 gx-lg-5 pb-4">
+
+            <div class="col-4 pb-md-2">
+                <ul class="navbar-nav flex-nowrap pt-2" style="max-width:160px;">
+                    <li class="nav-item text-light mb-2">
+                        <a class="rounded-2 text-light footer-nav-link footer-fs text-nowrap px-2" style="text-decoration:none;" asp-area="" asp-controller="Info" asp-action="Index">
+                            Home
+                        </a>
+                    </li>
+                    <li class="nav-item text-light mb-2">
+                        <a class="rounded-2 text-light footer-nav-link footer-fs text-nowrap px-2" style="text-decoration:none;" asp-controller="Info" asp-action="Contact">
+                            Contact
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="col-4 pe-0">
+                <ul class="navbar-nav flex-nowrap pt-2" style="max-width:160px;">
+
+                    @if (User.IsInRole("Member"))
+                    {
+                        <li class="nav-item dropdown pt-lg-0 pt-0 mb-2">
+                            <a class="rounded-2 text-light footer-nav-link dropdown-toggle footer-fs px-2" style="text-decoration:none; width:135px;" href="#" id="membersFooterDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Members
+                            </a>
+                            <ul class="dropdown-menu ps-lg-2 border-0 bg-transparent ps-4" aria-labelledby="membersFooterDropdown" style="margin-top: 0; width:180px;">
+                                <li class="nav-item text-light mb-2">
+                                    <a class="rounded-2 text-light footer-nav-link footer-fs text-nowrap ps-2" style="text-decoration:none;" asp-area="Identity" asp-page="/Account/Manage/Index">
+                                        Account Management
+                                    </a>
+                                </li>
+                                <li class="nav-item text-light mb-2">
+                                    <a class="rounded-2 text-light footer-nav-link footer-fs text-nowrap ps-2" style="text-decoration:none;" asp-controller="Document" asp-action="Browse">
+                                        Document Library
+                                    </a>
+                                </li>
+                                <li class="nav-item text-light mb-2">
+                                    <a class="rounded-2 text-light footer-nav-link footer-fs text-nowrap ps-2" style="text-decoration:none;" asp-controller="Gallery" asp-action="Browse">
+                                        Image Gallery
+                                    </a>
+                                </li>
+                                <li class="nav-item text-light mb-2">
+                                    <a class="rounded-2 text-light footer-nav-link footer-fs text-nowrap ps-2" style="text-decoration:none;" asp-controller="Links" asp-action="MoreLinks">
+                                        More Links
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    }
+
+                </ul>
+            </div>
+
+            <div class="col-4 pe-0">
+                <ul class="navbar-nav ms-auto flex-nowrap px-2 pt-2" style="max-width:160px">
+                    <li class="nav-item text-light mb-2">
+                        <a class="rounded-2 text-light footer-nav-link footer-fs text-nowrap px-2" style="text-decoration:none;" asp-controller="Info" asp-action="Privacy">
+                            Privacy
+                        </a>
+                    </li>
+                    <li class="nav-item text-light mb-2">
+                        <a class="rounded-2 text-light footer-nav-link footer-fs text-nowrap px-2" style="text-decoration:none;" asp-controller="Info" asp-action="TOS">
+                            Terms of Service
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="w-100 pt-3 text-white" style="background-color: #1a1a2e;">
+        <p class="text-center text-white" style="font-size: 10px;">
+            <img style="height: 20px;" src="~/images/site/SmallLogo.png" />
+            @siteName - Copyright &copy; @DateTime.Now.Year
+        </p>
+    </div>
+
+</div>

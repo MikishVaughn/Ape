@@ -1,0 +1,450 @@
+@page
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+
+@model Ape.Areas.Identity.Pages.UsersModel
+@{
+    ViewData["Title"] = "Manage Members";
+}
+
+@if (SignInManager.IsSignedIn(User) && User.IsInRole("Admin"))
+{
+    <div class="my-4">
+        <div class="row justify-content-center m-0 p-0">
+            <div class="col-12 p-1">
+
+                <div class="mb-3 text-center">
+                    <h2 class="text-black text-center">@ViewData["Title"]</h2>
+                </div>
+
+                <!-- Filter Card -->
+                <div class="card rounded mb-4 p-1 shadow">
+
+                    <h5 class="text-black my-2 ms-2">Filter Members</h5>
+
+                    <div class="mb-3">
+                        <h6 class="text-black mb-1 ps-2">(Also: 'no role' and 'not confirmed')</h6>
+
+                        <form class="shadow" method="get" id="searchForm">
+                            <div class="input-group">
+                                <button class="btn btn-sm btn-success" type="submit" id="searchButton">Search</button>
+                                <input type="text" class="form-control shadow-none" placeholder="Search..." asp-for="SearchTerm" id="searchInput" />
+
+                                <input type="hidden" asp-for="PageNumber" />
+                                <input type="hidden" asp-for="PageSize" />
+                                <input type="hidden" asp-for="SortColumn" />
+                                <input type="hidden" asp-for="SortOrder" />
+                                <input type="hidden" asp-for="StatusFilter" id="statusFilterHidden" />
+
+                                <button class="btn btn-sm btn-outline-secondary bg-success-subtle" type="button" id="clearSearch" style="display: none;">
+                                    Clear
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Status Filter -->
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center">
+                            <label for="statusFilterSelect" class="form-label me-2 mb-0">Status:</label>
+                            <select class="form-select form-select-sm" id="statusFilterSelect" style="width: auto;">
+                                <!option value="Active" @(Model.StatusFilter == "Active" ? "selected" : "")>Active Members</!option>
+                                <!option value="Inactive" @(Model.StatusFilter == "Inactive" ? "selected" : "")>Deactivated Members</!option>
+                                <!option value="All" @(Model.StatusFilter == "All" ? "selected" : "")>All Members</!option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center mb-2">
+                        <span id="userCount" class="me-3 pb-1 pt-1">Total Members: @Model.TotalUsers</span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center m-0 p-0">
+            <div class="col-12 p-1">
+
+                <div class="card rounded m-0 p-1 shadow">
+
+                    <div class="mb-3" id="usersTableContainer">
+
+                        <div class="text-start">
+                            <h2 class="text-black">Select a Member</h2>
+                            <p class="text-muted"><em>Click any row to edit member details</em></p>
+                        </div>
+
+                        <div class="table-responsive rounded shadow">
+                            <table class="w-100 table-striped shadow" id="userTable">
+
+                                <thead>
+                                    <tr>
+                                        <th class="sortable text-nowrap" data-sort="fullname">
+                                            Full Name <span class="sort-indicator"></span>
+                                        </th>
+                                        <th class="sortable text-nowrap" data-sort="email">
+                                            Email <span class="sort-indicator"></span>
+                                        </th>
+                                        <th class="sortable text-nowrap" data-sort="emailconfirmed">
+                                            Email Confirmed <span class="sort-indicator"></span>
+                                        </th>
+                                        <th class="sortable text-nowrap" data-sort="phonenumber">
+                                            Cell Phone <span class="sort-indicator"></span>
+                                        </th>
+                                        <th class="sortable text-nowrap" data-sort="roles">
+                                            Roles <span class="sort-indicator"></span>
+                                        </th>
+                                        <th class="sortable text-nowrap" data-sort="lastlogin">
+                                            Last Login <span class="sort-indicator"></span>
+                                        </th>
+                                        <th class="sortable text-nowrap" data-sort="status">
+                                            Status <span class="sort-indicator"></span>
+                                        </th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="userTableBody">
+                                    @foreach (var user in Model.Users)
+                                    {
+                                        <tr class="text-decoration-none text-nowrap user-row @(!user.IsActive ? "inactive-user" : "")" data-user-id="@user.Id">
+                                            <td class="text-decoration-none text-nowrap">@user.FullName</td>
+                                            <td class="text-decoration-none text-nowrap">@user.Email</td>
+                                            <td class="text-decoration-none text-nowrap">
+                                                @if (user.EmailConfirmed)
+                                                {
+                                                    <text>Yes</text>
+                                                }
+                                            </td>
+                                            <td class="text-decoration-none text-nowrap">@user.PhoneNumber</td>
+                                            <td class="text-decoration-none text-nowrap">
+                                                @if (user.Roles != null)
+                                                {
+                                                    @foreach (var role in user.Roles)
+                                                    {
+                                                        <span>@role</span><br />
+                                                    }
+                                                }
+                                            </td>
+                                            <td data-utc-time="@user.LastLogin?.ToString("yyyy-MM-ddTHH:mm:ssZ")" class="text-decoration-none text-nowrap local-login-time">
+                                                @user.LastLogin?.ToString("yyyy-MM-dd HH:mm:ss UTC")
+                                            </td>
+                                            <td class="text-decoration-none text-nowrap">
+                                                @if (user.IsActive)
+                                                {
+                                                    <span class="badge bg-success">Active</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger" title="Deactivated: @user.DeactivatedDate?.ToString("yyyy-MM-dd") by @user.DeactivatedBy - @user.DeactivationReason">
+                                                        Deactivated
+                                                    </span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+
+                            </table>
+                        </div>
+
+                    </div>
+
+                    <!-- Pagination -->
+                    @{
+                        var totalPages = Model.TotalPages;
+                        var currentPage = Model.PageNumber;
+                        var pageDisplayLimit = 5;
+                        var startPage = Math.Max(1, currentPage - (int)Math.Floor((double)pageDisplayLimit / 2));
+                        var endPage = Math.Min(totalPages, startPage + pageDisplayLimit - 1);
+                        if (endPage - startPage + 1 < pageDisplayLimit)
+                        {
+                            startPage = Math.Max(1, endPage - pageDisplayLimit + 1);
+                        }
+                    }
+
+                    <nav id="paginationNav">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item @(currentPage <= 1 ? "disabled" : "")">
+                                <a class="page-link" asp-page="./Users"
+                                   asp-route-PageNumber="@(currentPage - 1)"
+                                   asp-route-PageSize="@Model.PageSize"
+                                   asp-route-SortColumn="@Model.SortColumn"
+                                   asp-route-SortOrder="@Model.SortOrder"
+                                   asp-route-SearchTerm="@Model.SearchTerm"
+                                   asp-route-StatusFilter="@Model.StatusFilter">
+                                    &laquo;
+                                </a>
+                            </li>
+
+                            @for (var ii = startPage; ii <= endPage; ii++)
+                            {
+                                <li class="page-item @(ii == currentPage ? "active" : "")">
+                                    <a class="page-link" asp-page="./Users"
+                                       asp-route-PageNumber="@ii"
+                                       asp-route-PageSize="@Model.PageSize"
+                                       asp-route-SortColumn="@Model.SortColumn"
+                                       asp-route-SortOrder="@Model.SortOrder"
+                                       asp-route-SearchTerm="@Model.SearchTerm"
+                                       asp-route-StatusFilter="@Model.StatusFilter">
+                                        @ii
+                                    </a>
+                                </li>
+                            }
+
+                            <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
+                                <a class="page-link" asp-page="./Users"
+                                   asp-route-PageNumber="@(currentPage + 1)"
+                                   asp-route-PageSize="@Model.PageSize"
+                                   asp-route-SortColumn="@Model.SortColumn"
+                                   asp-route-SortOrder="@Model.SortOrder"
+                                   asp-route-SearchTerm="@Model.SearchTerm"
+                                   asp-route-StatusFilter="@Model.StatusFilter"
+                                   aria-label="Next">
+                                    &raquo;
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="mt-4 text-center">
+        <p class="text-black mb-1">This is an Admin area.</p>
+        <p class="text-black mb-2">Please Login with Administration credentials.</p>
+        <a class="btn nav-link text-gray fs-3" asp-area="Identity" asp-page="/Account/Login">Login</a>
+    </div>
+}
+
+@section Styles {
+    <style>
+        .sortable {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            padding: 0.75rem !important;
+            vertical-align: middle;
+        }
+
+        .sortable:hover {
+            background-color: #f8f9fa;
+            color: #0066cc;
+        }
+
+        .sort-indicator {
+            font-weight: bold;
+            color: #6c757d;
+            margin-left: 5px;
+            display: inline-block;
+            min-width: 15px;
+        }
+
+        .sort-indicator.active {
+            color: #0066cc;
+        }
+
+        .sorted-asc,
+        .sorted-desc {
+            background-color: #e3f2fd !important;
+            color: #0066cc !important;
+        }
+
+        .inactive-user {
+            background-color: #fff2f2 !important;
+            opacity: 0.7;
+        }
+
+        .inactive-user:hover {
+            background-color: #ffe6e6 !important;
+        }
+
+        .table-responsive {
+            padding-bottom: .5em;
+        }
+
+        .table-striped tbody tr.user-row:nth-of-type(odd):hover,
+        .table-striped tbody tr.user-row:nth-of-type(even):hover,
+        tbody tr.user-row:hover {
+            cursor: pointer;
+            border: 2px solid green;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('searchInput');
+            const clearSearch = document.getElementById('clearSearch');
+            const searchForm = document.getElementById('searchForm');
+            const statusFilterSelect = document.getElementById('statusFilterSelect');
+            const statusFilterHidden = document.getElementById('statusFilterHidden');
+
+            localizeLastLoginTimes();
+            setupSortableHeaders();
+            updateSortIndicators();
+            attachRowClickListeners();
+
+            // Show/hide clear button based on search input
+            if (searchInput && clearSearch) {
+                clearSearch.style.display = searchInput.value ? 'block' : 'none';
+                searchInput.addEventListener('input', function () {
+                    clearSearch.style.display = this.value ? 'block' : 'none';
+                });
+            }
+
+            // Clear search
+            if (clearSearch && searchInput) {
+                clearSearch.addEventListener('click', function () {
+                    searchInput.value = '';
+                    clearSearch.style.display = 'none';
+                    // Reset page to 1 and submit
+                    var pageInput = document.querySelector('input[name="PageNumber"]');
+                    if (pageInput) pageInput.value = '1';
+                    searchForm.submit();
+                });
+            }
+
+            // Status filter change triggers navigation
+            if (statusFilterSelect && statusFilterHidden) {
+                statusFilterSelect.addEventListener('change', function () {
+                    statusFilterHidden.value = this.value;
+                    var pageInput = document.querySelector('input[name="PageNumber"]');
+                    if (pageInput) pageInput.value = '1';
+                    searchForm.submit();
+                });
+            }
+
+            // Search form resets page on submit
+            if (searchForm) {
+                searchForm.addEventListener('submit', function () {
+                    var pageInput = document.querySelector('input[name="PageNumber"]');
+                    if (pageInput) pageInput.value = '1';
+                    if (statusFilterHidden && statusFilterSelect) {
+                        statusFilterHidden.value = statusFilterSelect.value;
+                    }
+                });
+            }
+
+            // Localize last login times to user's timezone
+            function localizeLastLoginTimes() {
+                const elements = document.querySelectorAll('.local-login-time');
+                elements.forEach(function (element) {
+                    const utcTimeString = element.getAttribute('data-utc-time');
+                    if (utcTimeString) {
+                        const date = new Date(utcTimeString);
+                        const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true };
+                        try {
+                            element.textContent = date.toLocaleString(undefined, options);
+                        } catch (e) {
+                            element.textContent = utcTimeString + ' (UTC)';
+                        }
+                    } else {
+                        element.textContent = 'Never';
+                    }
+                });
+            }
+
+            // Sortable column headers
+            function setupSortableHeaders() {
+                document.querySelectorAll('.sortable').forEach(header => {
+                    header.addEventListener('click', function () {
+                        const sortField = this.getAttribute('data-sort');
+                        if (sortField) {
+                            sortTable(sortField);
+                        }
+                    });
+                });
+            }
+
+            function sortTable(column) {
+                const currentSortColumnInput = document.querySelector('input[name="SortColumn"]');
+                const currentSortOrderInput = document.querySelector('input[name="SortOrder"]');
+                const currentColumn = currentSortColumnInput ? currentSortColumnInput.value : '';
+                const currentOrder = currentSortOrderInput ? currentSortOrderInput.value : 'asc';
+
+                const newOrder = (currentColumn === column && currentOrder === 'asc') ? 'desc' : 'asc';
+
+                const searchTermInput = document.querySelector('input[name="SearchTerm"]');
+                const searchTermVal = searchTermInput ? searchTermInput.value : '';
+                const pageSizeInput = document.querySelector('input[name="PageSize"]');
+                const pageSizeVal = pageSizeInput ? pageSizeInput.value : '20';
+                const statusFilterInput = document.querySelector('input[name="StatusFilter"]');
+                const statusFilterVal = statusFilterInput ? statusFilterInput.value : 'Active';
+
+                window.location.href = `@Url.Page("./Users")?sortColumn=${column}&sortOrder=${newOrder}&searchTerm=${encodeURIComponent(searchTermVal)}&pageNumber=1&pageSize=${pageSizeVal}&statusFilter=${encodeURIComponent(statusFilterVal)}`;
+            }
+
+            function updateSortIndicators() {
+                const currentSortColumnInput = document.querySelector('input[name="SortColumn"]');
+                const currentSortOrderInput = document.querySelector('input[name="SortOrder"]');
+                const sortColumn = currentSortColumnInput ? currentSortColumnInput.value : '';
+                const sortOrder = currentSortOrderInput ? currentSortOrderInput.value : '';
+
+                document.querySelectorAll('.sortable').forEach(header => {
+                    header.classList.remove('sorted-asc', 'sorted-desc');
+                    const indicator = header.querySelector('.sort-indicator');
+                    if (indicator) {
+                        indicator.textContent = '';
+                        indicator.className = 'sort-indicator';
+                    }
+                });
+
+                if (sortColumn) {
+                    const activeHeader = document.querySelector(`.sortable[data-sort="${sortColumn.toLowerCase()}"]`);
+                    if (activeHeader) {
+                        activeHeader.classList.add(`sorted-${sortOrder}`);
+                        const indicator = activeHeader.querySelector('.sort-indicator');
+                        if (indicator) {
+                            indicator.textContent = sortOrder === 'asc' ? ' \u2191' : ' \u2193';
+                            indicator.className = 'sort-indicator active';
+                        }
+                    }
+                }
+            }
+
+            // Row click to navigate to EditUser
+            function attachRowClickListeners() {
+                const rows = document.querySelectorAll('tr.user-row');
+                rows.forEach(row => {
+                    row.addEventListener('click', function (event) {
+                        if (event.target.tagName === 'A' || event.target.closest('a')) return;
+
+                        const userId = this.dataset.userId;
+                        if (!userId) return;
+
+                        const pageNumberInput = document.querySelector('input[name="PageNumber"]');
+                        const pageSizeInput = document.querySelector('input[name="PageSize"]');
+                        const sortColumnInput = document.querySelector('input[name="SortColumn"]');
+                        const sortOrderInput = document.querySelector('input[name="SortOrder"]');
+                        const searchInput = document.getElementById('searchInput');
+                        const statusFilterInput = document.querySelector('input[name="StatusFilter"]');
+
+                        const pageNumber = pageNumberInput ? pageNumberInput.value : '1';
+                        const pageSize = pageSizeInput ? pageSizeInput.value : '20';
+                        const sortColumn = sortColumnInput ? sortColumnInput.value : '';
+                        const sortOrder = sortOrderInput ? sortOrderInput.value : '';
+                        const searchTermVal = searchInput ? searchInput.value : '';
+                        const statusFilter = statusFilterInput ? statusFilterInput.value : 'Active';
+
+                        let returnUrl = `${window.location.pathname}?PageNumber=${pageNumber}&PageSize=${pageSize}`;
+                        if (sortColumn) {
+                            returnUrl += `&SortColumn=${sortColumn}&SortOrder=${sortOrder}`;
+                        }
+                        if (searchTermVal && searchTermVal.trim() !== '') {
+                            returnUrl += `&SearchTerm=${encodeURIComponent(searchTermVal.trim())}`;
+                        }
+                        returnUrl += `&StatusFilter=${encodeURIComponent(statusFilter)}`;
+
+                        window.location.href = `/Identity/EditUser?id=${userId}&returnUrl=${encodeURIComponent(returnUrl)}`;
+                    });
+                });
+            }
+        });
+    </script>
+}

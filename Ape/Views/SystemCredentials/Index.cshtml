@@ -1,0 +1,322 @@
+@model Ape.Models.ViewModels.CredentialsIndexViewModel
+@{
+    ViewData["Title"] = "System Credentials Management";
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="bi bi-key-fill text-primary"></i> System Credentials
+                    </h2>
+                    <p class="text-muted mb-0">Secure credential management with encryption and audit logging</p>
+                </div>
+                <div>
+                    @if (Model.IsMasterKeyConfigured)
+                    {
+                        <a href="@Url.Action("Create")" class="btn btn-success">
+                            <i class="bi bi-plus-circle"></i> Add New Credential
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Warning"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle-fill"></i> @TempData["Warning"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!Model.IsMasterKeyConfigured)
+    {
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-shield-exclamation"></i> Master Key Not Configured</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-3">The master encryption key is not configured. You must set the <code>MASTER_CREDENTIAL_KEY_ILLUSTRATE</code> environment variable before using the credential management system.</p>
+
+                <h6>Setup Instructions:</h6>
+                <ol>
+                    <li>Generate a secure master key (32+ characters)</li>
+                    <li>Set environment variable: <code>[System.Environment]::SetEnvironmentVariable('MASTER_CREDENTIAL_KEY_ILLUSTRATE', 'your-key-here', 'User')</code></li>
+                    <li>Restart the application</li>
+                </ol>
+
+                <div class="alert alert-info mb-0">
+                    <strong>PowerShell Script to Generate Key:</strong><br/>
+                    <code class="d-block mt-2">
+                        $bytes = New-Object byte[] 32<br/>
+                        [Security.Cryptography.RNGCryptoServiceProvider]::Create().GetBytes($bytes)<br/>
+                        $key = [Convert]::ToBase64String($bytes)<br/>
+                        [System.Environment]::SetEnvironmentVariable('MASTER_CREDENTIAL_KEY_ILLUSTRATE', $key, 'User')
+                    </code>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-0">
+                                    <span class="badge bg-success"><i class="bi bi-shield-check"></i> Encryption Active</span>
+                                </h5>
+                                <small class="text-muted">Master key configured, credentials are encrypted with AES256</small>
+                            </div>
+                            <div class="text-end">
+                                <h3 class="mb-0">@Model.TotalCredentials</h3>
+                                <small class="text-muted">Total Credentials</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @foreach (var category in Model.Categories)
+        {
+            var credentials = Model.CredentialsByCategory.ContainsKey(category)
+                ? Model.CredentialsByCategory[category]
+                : new List<Ape.Models.ViewModels.CredentialViewModel>();
+
+            if (!credentials.Any()) { continue; }
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-@GetCategoryIcon(category)"></i> @category Credentials
+                        <span class="badge bg-secondary ms-2">@credentials.Count</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Key</th>
+                                        <th>Value</th>
+                                        <th>Description</th>
+                                        <th style="width: 250px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var cred in credentials.OrderBy(c => c.CredentialName))
+                                    {
+                                        <tr class="@(!cred.IsActive ? "table-secondary" : "")">
+                                            <td>
+                                                <strong>@cred.CredentialName</strong>
+                                                @if (!cred.IsActive)
+                                                {
+                                                    <span class="badge bg-secondary ms-1">Inactive</span>
+                                                }
+                                            </td>
+                                            <td><code>@cred.CredentialKey</code></td>
+                                            <td>
+                                                <span class="credential-value-masked" data-credential-id="@cred.CredentialID">
+                                                    @cred.MaskedValue
+                                                </span>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary btn-view-value"
+                                                        data-credential-id="@cred.CredentialID"
+                                                        title="View Credential">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                            </td>
+                                            <td>
+                                                <small class="text-muted">@(cred.Description ?? "-")</small>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <a href="@Url.Action("Edit", new { id = cred.CredentialID })"
+                                                       class="btn btn-primary"
+                                                       title="Edit">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+
+                                                    @if (category == "Database")
+                                                    {
+                                                        <button type="button"
+                                                                class="btn btn-info btn-test-database"
+                                                                data-credential-id="@cred.CredentialID"
+                                                                title="Test Connection">
+                                                            <i class="bi bi-database-check"></i>
+                                                        </button>
+                                                    }
+                                                    @if (category == "API")
+                                                    {
+                                                        <button type="button"
+                                                                class="btn btn-info btn-test-api"
+                                                                data-credential-id="@cred.CredentialID"
+                                                                title="Test API">
+                                                            <i class="bi bi-cloud-check"></i>
+                                                        </button>
+                                                    }
+
+                                                    <a href="@Url.Action("AuditHistory", new { id = cred.CredentialID })"
+                                                       class="btn btn-secondary"
+                                                       title="Audit History">
+                                                        <i class="bi bi-clock-history"></i>
+                                                    </a>
+
+                                                    <a href="@Url.Action("Delete", new { id = cred.CredentialID })"
+                                                       class="btn btn-danger"
+                                                       title="Delete">
+                                                        <i class="bi bi-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@* View Credential Modal *@
+<div class="modal fade" id="viewCredentialModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Credential Value</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle-fill"></i> <strong>Security Warning:</strong> This value is sensitive. Do not share or expose it.
+                </div>
+                <div class="form-group">
+                    <label>Decrypted Value:</label>
+                    <textarea class="form-control" id="decryptedValueText" readonly rows="4"></textarea>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-secondary mt-2" id="copyValueBtn">
+                    <i class="bi bi-clipboard"></i> Copy to Clipboard
+                </button>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // View credential value
+            $('.btn-view-value').click(function () {
+                var credentialId = $(this).data('credential-id');
+
+                $.get('@Url.Action("GetDecryptedValue")', { id: credentialId }, function (result) {
+                    if (result.success) {
+                        $('#decryptedValueText').val(result.value);
+                        $('#viewCredentialModal').modal('show');
+                    } else {
+                        alert('Error retrieving credential: ' + result.error);
+                    }
+                });
+            });
+
+            // Copy to clipboard
+            $('#copyValueBtn').click(function () {
+                var textarea = document.getElementById('decryptedValueText');
+                textarea.select();
+                document.execCommand('copy');
+
+                $(this).html('<i class="bi bi-check"></i> Copied!');
+                setTimeout(() => {
+                    $(this).html('<i class="bi bi-clipboard"></i> Copy to Clipboard');
+                }, 2000);
+            });
+
+            // Test database connection
+            $('.btn-test-database').click(function () {
+                var btn = $(this);
+                var credentialId = btn.data('credential-id');
+                var originalHtml = btn.html();
+
+                btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+
+                $.post('@Url.Action("TestDatabaseConnection")', { id: credentialId }, function (result) {
+                    btn.prop('disabled', false).html(originalHtml);
+
+                    if (result.success) {
+                        alert('✓ ' + result.message + '\n\n' + result.details);
+                    } else {
+                        alert('✗ ' + result.message + '\n\nError: ' + result.error);
+                    }
+                }).fail(function () {
+                    btn.prop('disabled', false).html(originalHtml);
+                    alert('Connection test failed');
+                });
+            });
+
+            // Test API key
+            $('.btn-test-api').click(function () {
+                var btn = $(this);
+                var credentialId = btn.data('credential-id');
+                var originalHtml = btn.html();
+
+                btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+
+                $.post('@Url.Action("TestApiKey")', { id: credentialId }, function (result) {
+                    btn.prop('disabled', false).html(originalHtml);
+
+                    if (result.success) {
+                        alert('✓ ' + result.message + '\n\n' + result.details);
+                    } else {
+                        alert('✗ ' + result.message + '\n\nError: ' + result.error);
+                    }
+                }).fail(function () {
+                    btn.prop('disabled', false).html(originalHtml);
+                    alert('API test failed');
+                });
+            });
+        });
+    </script>
+}
+
+@functions {
+    string GetCategoryIcon(string category)
+    {
+        return category switch
+        {
+            "Database" => "database",
+            "API" => "cloud",
+            "Email" => "envelope",
+            "Billing" => "credit-card",
+            "Site" => "gear",
+            _ => "key"
+        };
+    }
+}

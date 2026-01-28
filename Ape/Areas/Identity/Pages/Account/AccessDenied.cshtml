@@ -1,0 +1,56 @@
+﻿@page
+@model AccessDeniedModel
+@{
+    ViewData["Title"] = "Access Not Available";
+}
+
+<head>
+    <title>@ViewData["Title"]</title>
+</head>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card rounded-3 p-4 shadow-lg border-0" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                <div class="card-body text-center py-4">
+                    <!-- Friendly Icon -->
+                    <div class="mb-4">
+                        🛡️⚠️
+                    </div>
+                    
+                    <!-- Pleasant Heading -->
+                    <h2 class="text-dark mb-3" style="font-weight: 600;">@ViewData["Title"]</h2>
+                    
+                    <!-- Friendly Message -->
+                    <div class="alert alert-light border-0 mb-4" style="background-color: rgba(255, 255, 255, 0.8);">
+                        <p class="text-muted mb-2" style="font-size: 1.1rem;">
+                            ℹ️
+                            This area requires specific permissions that your current role doesn't include.
+                        </p>
+                        <p class="text-muted mb-0">
+                            If you believe you should have access to this resource, please contact your administrator.
+                        </p>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+                        <a href="/" class="btn btn-primary rounded-2 shadow-sm px-4">
+                            🏠Return Home
+                        </a>
+                        <a href="javascript:history.back()" class="btn btn-outline-secondary rounded-2 px-4">
+                            ⬅️Go Back
+                        </a>
+                    </div>
+
+                    <!-- Additional Help -->
+                    <div class="mt-4 pt-3 border-top border-light">
+                        <small class="text-muted">
+                            ❓
+                            Need help? Contact your system administrator for assistance with access permissions.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

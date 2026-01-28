@@ -1,0 +1,49 @@
+@model Ape.Models.ViewModels.FolderTreeNode
+@using Ape.Models
+
+<li>
+    <div class="folder-tree-item @(Model.IsSelected ? "selected" : "") @(Model.AccessLevel > DocumentAccessLevel.Member ? "folder-restricted" : "")">
+        @if (Model.Children.Any())
+        {
+            <span class="folder-toggle" onclick="toggleFolderNode(this)">@Html.Raw(Model.IsExpanded ? "&#9660;" : "&#9654;")</span>
+        }
+        else
+        {
+            <span class="folder-toggle">&nbsp;</span>
+        }
+        <span class="folder-icon">
+            @if (Model.AccessLevel > DocumentAccessLevel.Member)
+            {
+                <span>&#128274;</span>
+            }
+            else
+            {
+                <span>&#128193;</span>
+            }
+        </span>
+        <a href="@Url.Action("Browse", "Document", new { folderId = Model.FolderId })" title="@Model.Name">
+            @Model.Name
+        </a>
+    </div>
+    @if (Model.Children.Any())
+    {
+        <ul class="@(Model.IsExpanded ? "" : "d-none")">
+            @foreach (var child in Model.Children)
+            {
+                @await Html.PartialAsync("_FolderTreeNode", child)
+            }
+        </ul>
+    }
+</li>
+
+<script>
+    function toggleFolderNode(toggleElement) {
+        const listItem = toggleElement.closest('li');
+        const childList = listItem.querySelector(':scope > ul');
+        if (childList) {
+            childList.classList.toggle('d-none');
+            // Update the toggle arrow
+            toggleElement.innerHTML = childList.classList.contains('d-none') ? '&#9654;' : '&#9660;';
+        }
+    }
+</script>

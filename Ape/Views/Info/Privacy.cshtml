@@ -1,0 +1,170 @@
+@{
+    ViewData["Title"] = "Privacy Policy";
+}
+
+<div class="container-fluid mt-4 mb-4">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h3 class="h2 mb-0">Privacy Policy</h3>
+                </div>
+                <div class="card-body">
+
+                    <div class="alert alert-info">
+                        <strong>Effective Date:</strong> January 1, 2025<br>
+                        <strong>Last Updated:</strong> @DateTime.Now.ToString("MMMM dd, yyyy")
+                    </div>
+
+                    <div class="alert alert-primary">
+                        This Privacy Policy explains how we collect, use, and protect your personal information.
+                        Your privacy is important to us, and we are committed to protecting your personal data.
+                    </div>
+
+                    <h3>1. Information We Collect</h3>
+
+                    <h4>1.1 Personal Information</h4>
+                    <p>We collect and maintain the following types of personal information:</p>
+                    <ul>
+                        <li><strong>Contact Information:</strong> Name, email address, phone number</li>
+                        <li><strong>Profile Information:</strong> Display name, address details</li>
+                        <li><strong>Account Information:</strong> Username, password (encrypted), login activity</li>
+                    </ul>
+
+                    <h4>1.2 System Usage Data</h4>
+                    <p>We automatically collect certain information about your system usage:</p>
+                    <ul>
+                        <li><strong>Login Information:</strong> Login times, IP addresses, session duration</li>
+                        <li><strong>System Activity:</strong> Pages accessed, features used</li>
+                        <li><strong>Device Information:</strong> Browser type, device type, screen resolution</li>
+                    </ul>
+
+                    <h3>2. How We Use Your Information</h3>
+                    <p>We use your information for the following purposes:</p>
+                    <ul>
+                        <li><strong>Account Management:</strong> Creating, maintaining, and securing your account</li>
+                        <li><strong>Communication:</strong> Sending system notifications and service-related emails</li>
+                        <li><strong>System Improvement:</strong> Analyzing usage patterns to improve functionality</li>
+                        <li><strong>Security:</strong> Detecting and preventing unauthorized access or abuse</li>
+                    </ul>
+
+                    <h3>3. Information Sharing</h3>
+
+                    <h4>3.1 What We Do NOT Do</h4>
+                    <p>We do not and will never:</p>
+                    <ul>
+                        <li>Sell your personal data to third parties</li>
+                        <li>Share your personal information for advertising purposes</li>
+                        <li>Disclose personal information for unauthorized commercial purposes</li>
+                    </ul>
+
+                    <h4>3.2 When We May Share Information</h4>
+                    <p>We may share information only in the following circumstances:</p>
+                    <ul>
+                        <li>When required by law or legal process</li>
+                        <li>To protect the rights, safety, or property of our users or the public</li>
+                        <li>With service providers who assist in operating the System (under strict data protection agreements)</li>
+                    </ul>
+
+                    <h3>4. Data Security</h3>
+
+                    <h4>4.1 Security Measures</h4>
+                    <p>We implement security measures including:</p>
+                    <ul>
+                        <li><strong>Encryption:</strong> Data encrypted in transit and at rest</li>
+                        <li><strong>Access Controls:</strong> Role-based access limitations</li>
+                        <li><strong>Authentication:</strong> Secure login with optional two-factor authentication</li>
+                        <li><strong>Monitoring:</strong> Security monitoring and alerts</li>
+                        <li><strong>Backups:</strong> Regular, secure data backups</li>
+                    </ul>
+
+                    <h4>4.2 Data Retention</h4>
+                    <p>We retain information according to the following schedule:</p>
+                    <ul>
+                        <li><strong>Personal Information:</strong> As long as your account is active</li>
+                        <li><strong>System Logs:</strong> 12 months for security purposes</li>
+                        <li><strong>Account Data:</strong> Deleted upon account deletion request, subject to legal retention requirements</li>
+                    </ul>
+
+                    <h3>5. Your Privacy Rights</h3>
+                    <p>You have the right to:</p>
+                    <ul>
+                        <li>Access your personal data</li>
+                        <li>Update or correct your information</li>
+                        <li>Request deletion of your account and associated data</li>
+                        <li>Opt out of non-essential communications</li>
+                    </ul>
+
+                    <h3>6. Cookies</h3>
+                    <p>We use cookies for essential functions:</p>
+                    <ul>
+                        <li><strong>Authentication:</strong> Keeping you logged in securely</li>
+                        <li><strong>Preferences:</strong> Remembering your settings</li>
+                        <li><strong>Security:</strong> Detecting and preventing unauthorized access</li>
+                    </ul>
+
+                    <h3>7. Children's Privacy</h3>
+                    <p>
+                        We are committed to protecting children's privacy. Users under 13 require parental consent.
+                        We implement special protections for users under 18. Parents can request access to or
+                        deletion of their child's data.
+                    </p>
+
+                    <h3>8. Data Breach Response</h3>
+                    <p>In the event of a security incident, we will:</p>
+                    <ul>
+                        <li>Immediately investigate and secure the system</li>
+                        <li>Assess what information may have been affected</li>
+                        <li>Notify affected users within 72 hours</li>
+                        <li>Provide clear information about the incident</li>
+                        <li>Report to authorities as required by law</li>
+                    </ul>
+
+                    <h3>9. International Users</h3>
+                    <p>
+                        Our services are operated from the United States. If you access our system from
+                        outside the US, your information may be transferred to and processed in the United States.
+                        We comply with applicable international privacy laws and regulations.
+                    </p>
+
+                    <h3>10. Changes to This Policy</h3>
+                    <p>When we update this Privacy Policy, we will:</p>
+                    <ul>
+                        <li>Post the updated policy in the system</li>
+                        <li>Send email notifications for significant changes</li>
+                        <li>Update the "Last Updated" date</li>
+                    </ul>
+
+                    <h3>11. Contact Information</h3>
+                    <p>For privacy questions or requests, contact us:</p>
+                    <div class="bg-light p-3 rounded text-center">
+                        <a asp-controller="Info" asp-action="Contact" class="btn btn-success btn-lg">
+                            <i class="bi bi-envelope-fill"></i>
+                            Contact Us
+                        </a>
+                    </div>
+
+                    <h4>11.1 Response Time</h4>
+                    <p>
+                        We respond to privacy requests within 30 days. Complex requests may take longer,
+                        and we will keep you informed of any delays.
+                    </p>
+
+                    <h3>12. Governing Law</h3>
+                    <p>
+                        This Privacy Policy is governed by Florida state law and applicable federal privacy
+                        regulations. Privacy disputes are subject to Florida court jurisdiction.
+                    </p>
+
+                    <div class="alert alert-success mt-4">
+                        <strong>Our Privacy Commitment:</strong>
+                        We are committed to protecting your privacy and being transparent about our data practices.
+                        Your data belongs to you, and we are here to help you manage it safely and securely.
+                        If you have any privacy concerns, please contact us.
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

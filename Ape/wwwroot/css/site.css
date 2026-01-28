@@ -1,0 +1,786 @@
+﻿html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main[role="main"] {
+  flex: 1;
+}
+
+.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+  color: var(--bs-secondary-color);
+  text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+  text-align: start;
+}
+
+/* Footer */
+.footer-nav-link {
+  color: #ffffffcc;
+  transition: color 0.2s, background-color 0.2s;
+  padding: 2px 6px;
+}
+
+.footer-nav-link:hover {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.footer-fs {
+  font-size: 0.85rem;
+}
+
+/* Icon pair - works for both mobile and desktop buttons */
+.icon-pair {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+}
+
+    .icon-pair span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 1.2em;
+        vertical-align: middle;
+    }
+
+        /* Default spacing for narrow icons (🧍, ⚡, ⚙️) */
+        .icon-pair span:first-child {
+            margin-right: -8px;
+        }
+
+    /* Reduced spacing for wider icons (🧍, 🌎) - prevents overlap */
+    .icon-pair.icon-wide span:first-child {
+        margin-right: -4px;
+    }
+
+/* Gentler spacing in navbar menus (mobile hamburger renders larger) */
+.navbar .icon-pair span:first-child {
+    margin-right: -5px;
+}
+
+.navbar .icon-pair.icon-wide span:first-child {
+    margin-right: -2px;
+}
+
+/* Desktop CTA buttons need more space for wide icons */
+.icon-pair.icon-wide span:first-child {
+    margin-right: 0px;
+}
+
+
+/* #region Spinner & Animation Utilities */
+
+@keyframes slideIn {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Border-radius helpers */
+.no-right-radius {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+.no-left-radius {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+}
+
+/* #endregion Spinner & Animation Utilities */
+
+
+/* #region Enhanced Table Styling */
+
+/*
+ * ENHANCED TABLE IMPLEMENTATION GUIDE
+ * ===================================
+ *
+ * USAGE PATTERN:
+ * 1. Container: <div class="table-responsive enhanced-table-container">
+ * 2. Table:     <table class="table enhanced-table">
+ * 3. Rows:      <tr class="enhanced-table-row">
+ *
+ * FEATURES:
+ * - Smooth hover transitions with accent color left border
+ * - No layout shifting (border-left reserves space via transparent border)
+ * - Subtle background highlighting and box shadow on hover
+ * - Mobile responsive with horizontal scroll support
+ * - Alternative color schemes: .admin-style, .warning-style, .danger-style
+ */
+
+/* Enhanced table row with hover effects and left border indicator */
+.enhanced-table-row {
+    transition: all 0.3s ease-in-out;
+    border-left: 3px solid transparent;
+    cursor: pointer;
+}
+
+.enhanced-table-row:hover {
+    background-color: rgba(40,167,69,0.05) !important;
+    border-left: 3px solid #28a745;
+    box-shadow: 0 2px 8px rgba(40,167,69,0.15);
+}
+
+/* Enhanced table container - allow horizontal scroll if needed */
+.enhanced-table-container {
+    overflow-x: auto;
+}
+
+/* Enhanced table class for easy application */
+.enhanced-table .enhanced-table-row {
+    transition: all 0.3s ease-in-out;
+    border-left: 3px solid transparent;
+}
+
+.enhanced-table .enhanced-table-row:hover {
+    background-color: rgba(40,167,69,0.05) !important;
+    border-left: 3px solid #28a745;
+    box-shadow: 0 2px 8px rgba(40,167,69,0.15);
+}
+
+/* Alternative color schemes for different contexts */
+.enhanced-table-row.admin-style:hover {
+    background-color: rgba(13, 110, 253, 0.05) !important;
+    border-left: 3px solid #0d6efd;
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.15);
+}
+
+.enhanced-table-row.warning-style:hover {
+    background-color: rgba(255, 193, 7, 0.05) !important;
+    border-left: 3px solid #ffc107;
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.15);
+}
+
+.enhanced-table-row.danger-style:hover {
+    background-color: rgba(220, 53, 69, 0.05) !important;
+    border-left: 3px solid #dc3545;
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.15);
+}
+
+/* Responsive table fixes for mobile */
+@media (max-width: 767px) {
+    .table-responsive {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table td, .table th {
+        white-space: nowrap;
+        min-width: auto;
+    }
+
+    .enhanced-table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .enhanced-table td {
+        white-space: nowrap;
+    }
+}
+
+/* Force text wrapping for title columns that exceed length limit */
+.enhanced-table td.title-wrap {
+    max-width: 300px !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+}
+
+/* #endregion Enhanced Table Styling */
+
+
+/* #region Drag and Drop Upload Styles */
+
+.drag-drop-zone {
+    position: relative;
+    border: 3px dashed #dee2e6;
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.drag-drop-zone:hover {
+    border-color: #007bff;
+    background-color: #e3f2fd;
+}
+
+.drag-drop-zone.drag-over {
+    border-color: #28a745;
+    background-color: #d4edda;
+    transform: scale(1.02);
+}
+
+.drag-drop-content {
+    position: relative;
+    z-index: 1;
+}
+
+.drag-drop-icon {
+    font-size: 3rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+    transition: color 0.3s ease;
+}
+
+.drag-drop-zone:hover .drag-drop-icon {
+    color: #007bff;
+}
+
+.drag-drop-zone.drag-over .drag-drop-icon {
+    color: #28a745;
+}
+
+.drag-drop-title {
+    color: #495057;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.drag-drop-subtitle {
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+}
+
+.drag-drop-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(40, 167, 69, 0.9), rgba(32, 134, 57, 0.9));
+    border-radius: 9px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.drag-drop-overlay.show {
+    display: flex;
+}
+
+.drag-drop-overlay-content {
+    text-align: center;
+}
+
+.drag-drop-overlay-content i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+}
+
+/* Selected files display */
+.gallery-upload #selectedFilesText {
+    font-size: 0.9rem;
+}
+
+.gallery-upload #selectedFilesText.has-files {
+    color: #28a745 !important;
+    font-weight: 600;
+}
+
+/* #endregion Drag and Drop Upload Styles */
+
+
+/* #region HTML5 Native Date Input Styling */
+
+input[type="date"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="week"] {
+    position: relative;
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+input[type="date"]:focus,
+input[type="datetime-local"]:focus,
+input[type="month"]:focus,
+input[type="week"]:focus {
+    color: #212529;
+    background-color: #fff;
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Style the calendar icon */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%230d6efd' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/%3E%3C/svg%3E");
+    cursor: pointer;
+    padding: 0.25rem;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+    background-color: rgba(13, 110, 253, 0.1);
+    border-radius: 0.25rem;
+}
+
+/* #endregion HTML5 Native Date Input Styling */
+
+
+/* #region jQuery UI DatePicker Global Styles */
+
+.date-picker {
+    cursor: pointer;
+}
+
+.date-picker:focus {
+    outline: none;
+}
+
+/* Fix datepicker z-index to appear above Bootstrap modals and sticky headers */
+.ui-datepicker {
+    z-index: 9999 !important;
+    margin-top: 0.5rem !important;
+}
+
+.ui-widget-overlay {
+    z-index: 9998 !important;
+}
+
+/* Customize datepicker header */
+.ui-datepicker .ui-datepicker-header {
+    background: #e9ecef !important;
+    border: 1px solid #ced4da !important;
+    color: #212529 !important;
+}
+
+.ui-datepicker .ui-datepicker-title {
+    color: #212529 !important;
+    text-shadow: none;
+}
+
+/* Make month/year dropdowns visible and styled */
+.ui-datepicker select.ui-datepicker-month,
+.ui-datepicker select.ui-datepicker-year {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: auto !important;
+    min-width: 70px !important;
+    height: auto !important;
+    margin: 0 3px !important;
+    padding: 3px 8px !important;
+    font-size: 1em !important;
+    line-height: normal !important;
+}
+
+/* Override Bootstrap table styles that interfere with datepicker */
+.ui-datepicker table {
+    width: 100% !important;
+    margin: 0 !important;
+    border-collapse: collapse !important;
+}
+
+.ui-datepicker table td,
+.ui-datepicker table th {
+    white-space: normal !important;
+    min-width: auto !important;
+    padding: 2px !important;
+    text-align: center !important;
+    border: none !important;
+}
+
+/* Remove underlines and fix spacing for date links */
+.ui-datepicker table td a,
+.ui-datepicker table td span,
+.ui-datepicker td a.ui-state-default,
+.ui-datepicker td span.ui-state-default,
+.ui-datepicker a,
+.ui-datepicker a.ui-state-default {
+    text-decoration: none !important;
+    border: none !important;
+    padding: 2px !important;
+    margin: 0 !important;
+    display: block !important;
+    line-height: 1.4 !important;
+}
+
+.ui-datepicker .ui-state-default,
+.ui-datepicker .ui-state-default:link,
+.ui-datepicker .ui-state-default:visited,
+.ui-datepicker .ui-state-default:hover,
+.ui-datepicker .ui-state-default:active {
+    text-decoration: none !important;
+    border: 1px solid transparent !important;
+}
+
+/* Style the month/year navigation buttons */
+.ui-datepicker .ui-datepicker-prev,
+.ui-datepicker .ui-datepicker-next {
+    background: #6c757d !important;
+    border: 1px solid #5a6268 !important;
+    color: #ffffff !important;
+}
+
+.ui-datepicker .ui-datepicker-prev:hover,
+.ui-datepicker .ui-datepicker-next:hover {
+    background: #5a6268 !important;
+    border: 1px solid #4e555b !important;
+}
+
+/* Improved date picker button panel */
+.ui-datepicker .ui-datepicker-buttonpane {
+    background-image: none;
+    margin: 0.7em 0 0 0;
+    padding: 0 0.2em;
+    border-left: 0;
+    border-right: 0;
+    border-bottom: 0;
+}
+
+.ui-datepicker .ui-datepicker-buttonpane button {
+    float: right;
+    margin: 0.5em 0.2em 0.4em;
+    cursor: pointer;
+    padding: 0.2em 0.6em 0.3em 0.6em;
+    width: auto;
+    overflow: visible;
+}
+
+.ui-datepicker .ui-datepicker-buttonpane button.ui-datepicker-current {
+    float: left;
+}
+
+/* #endregion jQuery UI DatePicker Global Styles */
+
+
+/* #region ADA Compliance Styles */
+
+/* Skip to main content link */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: #000;
+    color: #fff;
+    padding: 8px;
+    text-decoration: none;
+    z-index: 10000;
+    border-radius: 0 0 4px 4px;
+    font-weight: bold;
+    transition: top 0.3s;
+}
+
+.skip-link:focus {
+    top: 0;
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+/* Enhanced focus indicators for keyboard navigation */
+a:focus,
+button:focus,
+input:focus,
+select:focus,
+textarea:focus,
+.btn:focus,
+.form-control:focus,
+.form-select:focus {
+    outline: 2px solid #0066cc !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.3) !important;
+}
+
+/* Focus indicators on dark backgrounds */
+.bg-dark a:focus,
+.bg-dark button:focus,
+.bg-primary a:focus,
+.bg-primary button:focus {
+    outline-color: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3) !important;
+}
+
+/* High contrast focus for critical actions */
+.btn-danger:focus,
+.btn-warning:focus {
+    outline: 3px solid #ffff00 !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 3px rgba(255, 255, 0, 0.5) !important;
+}
+
+/* Screen reader only content */
+.sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* Screen reader only content that becomes visible on focus */
+.sr-only-focusable:focus {
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 0.25rem 0.5rem !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    clip: auto !important;
+    white-space: normal !important;
+    background-color: #000 !important;
+    color: #fff !important;
+    border-radius: 0.25rem !important;
+    z-index: 1000 !important;
+}
+
+/* Form field error associations */
+.field-validation-error {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+.input-validation-error {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+/* ARIA live regions for dynamic content */
+.aria-live-polite {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+/* Enhanced dropdown accessibility */
+.dropdown-toggle[aria-expanded="true"] {
+    background-color: rgba(0, 123, 255, 0.1) !important;
+    border-color: #007bff !important;
+}
+
+/* Form field aria-invalid styling */
+input[aria-invalid="true"],
+select[aria-invalid="true"],
+textarea[aria-invalid="true"] {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+/* Required field indicators */
+.form-label .text-danger {
+    font-weight: bold;
+    margin-left: 0.25rem;
+}
+
+/* Improved help text visibility */
+.form-text {
+    color: #6c757d;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    margin-top: 0.375rem;
+}
+
+/* Enhanced keyboard navigation indicators */
+[tabindex]:focus,
+[tabindex="0"]:focus {
+    outline: 2px solid #007bff !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.25) !important;
+}
+
+/* Form field error state improvements */
+.is-invalid {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+.invalid-feedback {
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+/* Advanced validation styling */
+.text-danger[role="alert"] {
+    background-color: rgba(220, 53, 69, 0.1);
+    border-left: 3px solid #dc3545;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-weight: 500;
+    margin-top: 0.25rem;
+}
+
+/* Enhanced alert accessibility */
+.alert {
+    border-left: 4px solid;
+    font-weight: 500;
+}
+
+.alert-success { border-left-color: #28a745; }
+.alert-info { border-left-color: #17a2b8; }
+.alert-warning { border-left-color: #ffc107; }
+.alert-danger { border-left-color: #dc3545; }
+
+/* Improved modal accessibility */
+.modal-header .btn-close:focus {
+    outline: 2px solid #fff !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Better dropdown accessibility */
+.dropdown-item:focus {
+    background-color: #007bff !important;
+    color: #fff !important;
+    outline: none !important;
+}
+
+/* Improved form control accessibility */
+.form-control:focus,
+.form-select:focus {
+    border-color: #007bff !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+    outline: none !important;
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+    outline: 2px solid #007bff !important;
+    outline-offset: 2px !important;
+}
+
+/* Enhanced pagination accessibility */
+.page-link:focus {
+    outline: 2px solid #007bff !important;
+    outline-offset: 2px !important;
+    z-index: 3 !important;
+}
+
+/* Improved card accessibility */
+.card:focus-within {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* Better status indicator accessibility */
+.badge {
+    font-weight: 600;
+    border: 1px solid transparent;
+}
+
+/* Enhanced breadcrumb accessibility */
+.breadcrumb-item + .breadcrumb-item::before {
+    color: #6c757d;
+    font-weight: bold;
+}
+
+.breadcrumb-item.active {
+    font-weight: 600;
+}
+
+/* Improved spacing for touch targets (44px minimum per WCAG) */
+.btn {
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+}
+
+.btn-sm {
+    min-height: 36px;
+    padding: 0.5rem 0.75rem;
+}
+
+/* Reset touch-target overrides for buttons inside the navbar */
+.navbar .btn.nav-link {
+    min-height: auto;
+    padding: 0.5rem 1rem;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .btn {
+        border-width: 2px !important;
+        font-weight: bold !important;
+    }
+
+    .nav-link:focus,
+    .btn:focus {
+        outline: 3px solid #ffff00 !important;
+        outline-offset: 2px !important;
+    }
+
+    .table th,
+    .table td {
+        border-width: 2px !important;
+        border-color: #000 !important;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* #endregion ADA Compliance Styles */

@@ -1,0 +1,181 @@
+@inject Ape.Services.SecureConfigurationService ConfigService
+@{
+    ViewData["Title"] = "Welcome";
+    string siteName = await ConfigService.GetCredentialAsync("SITE_NAME") ?? "Ape";
+}
+
+<!-- Hero Section -->
+<div class="container mt-4 mb-5">
+
+    <h1 class="text-center display-5 fw-bold mb-3">Welcome to the<br />Ape framework</h1>
+
+    <div class="row align-items-center">
+
+        <div class="col-12 col-md-4 text-lg-end text-center mb-4 mb-md-0">
+            <img src="~/images/site/LargeLogo.png" alt="Ape mascot" class="img-fluid" style="max-height: 200px;" />
+        </div>
+
+        <div class="col-12 col-md-8" style="max-width: 620px;">
+            
+            <p class="lead text-secondary mb-4">
+                An <b>ASP.NET Core MVC</b> membership platform with role-based access,
+                secure document management, and admin-configurable settings.
+            </p>
+            <div class="d-flex flex-wrap gap-2">
+                <span class="badge rounded-pill bg-dark px-3 py-2">C#</span>
+                <span class="badge rounded-pill bg-dark px-3 py-2">.NET Core</span>
+                <span class="badge rounded-pill bg-dark px-3 py-2">MVC</span>
+                <span class="badge rounded-pill bg-dark px-3 py-2">Entity Framework</span>
+                <span class="badge rounded-pill bg-dark px-3 py-2">SQL Server</span>
+                <span class="badge rounded-pill bg-dark px-3 py-2">Bootstrap 5</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="rounded-3 bg-dark py-5 mx-auto" style="max-width: 1000px;">
+    <div class="container">
+        <h2 class="text-white text-center mb-2">Platform Features</h2>
+        <p class="text-center text-secondary mb-4">Built-in tools for managing members, content, and communications</p>
+
+        <div class="row g-4">
+
+            <!-- Identity & Security -->
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div>
+                            <i class="bi bi-shield-lock fs-2 text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Identity &amp; Security</h5>
+                        <p class="card-text text-secondary">
+                            ASP.NET Identity with Entity Framework, email verification, and secure account management.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role Management -->
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div>
+                            <i class="bi bi-people fs-2 text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Role Management</h5>
+                        <p class="card-text text-secondary">
+                            Role-driven access control with Admin and Member roles. Manage user assignments from the admin panel.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email System -->
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div>
+                            <i class="bi bi-envelope fs-2 text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Email System</h5>
+                        <p class="card-text text-secondary">
+                            Azure Communication Services with SMTP fallback. Configured through the System Credentials page.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Form -->
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div>
+                            <i class="bi bi-chat-dots fs-2 text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Contact Form</h5>
+                        <p class="card-text text-secondary">
+                            Public contact form with admin-configurable recipient addresses and email logging.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Document Library -->
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div>
+                            <i class="bi bi-file-earmark-pdf fs-2 text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Document Library</h5>
+                        <p class="card-text text-secondary">
+                            Hierarchical PDF management with folder-based organization. Supports Admin-only and Member-visible access levels.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image Gallery -->
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div>
+                            <i class="bi bi-images fs-2 text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Image Gallery</h5>
+                        <p class="card-text text-secondary">
+                            Admin-editable picture gallery with categorized albums and image management.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- More Links -->
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div>
+                            <i class="bi bi-link-45deg fs-2 text-primary"></i>
+                        </div>
+                        <h5 class="card-title">More Links</h5>
+                        <p class="card-text text-secondary">
+                            Organized link categories with drag-and-drop reordering. Admin-only and public visibility options.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Credentials -->
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div>
+                            <i class="bi bi-key fs-2 text-primary"></i>
+                        </div>
+                        <h5 class="card-title">System Credentials</h5>
+                        <p class="card-text text-secondary">
+                            Encrypted credential storage for API keys, SMTP settings, and service configuration with audit logging.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Users -->
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div>
+                            <i class="bi bi-activity fs-2 text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Active Members</h5>
+                        <p class="card-text text-secondary">
+                            Monitor currently active members and recent login activity from the admin dashboard.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

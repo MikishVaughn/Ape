@@ -1,0 +1,110 @@
+﻿@page
+@model LoginModel
+@{
+    ViewData["Title"] = "Login";
+}
+
+<head>
+    <title>@ViewData["Title"]</title>
+</head>
+
+<!-- Logo Image -->
+
+
+<div class="my-4 m-0 p-0">
+    <div class="row justify-content-center m-1 p-0">
+        <div class="col-md-5 col-lg-4 m-0 p-0">
+            <div class="card rounded p-2 shadow">
+
+                <!-- Title -->
+                <h2 class="text-black mb-4 text-center">
+                    🛡️🔒 @ViewData["Title"]
+                </h2>
+
+                <section>
+
+                    <!-- Log in Form -->
+                    <form id="account" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger text-center" role="alert"></div>
+
+                        <!-- Email -->
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                            <label asp-for="Input.Email" class="form-label">Email</label>
+                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="mb-3">
+                            <div class="input-group">
+                                <input asp-for="Input.Password" id="password" type="password" class="form-control" autocomplete="off" aria-required="true" placeholder="password" />
+                                <button type="button" id="togglePassword" class="btn btn-sm btn-outline-secondary bg-red-lighter">
+                                    <span id="passwordIcon">🙈</span>
+                                </button>
+                            </div>
+                            <span asp-validation-for="Input.Password" class="text-danger"></span>
+                        </div>
+
+                        <!-- Remember Me -->
+                        <div class="form-check mb-3">
+                            <input class="form-check-input custom-checkbox-green" asp-for="Input.RememberMe" id="rememberMe" />
+                            <label class="form-check-label" asp-for="Input.RememberMe" for="rememberMe">
+                                @Html.DisplayNameFor(m => m.Input.RememberMe)
+                            </label>
+                        </div>
+
+                        <!-- Forgot your Password -->
+                        <div class="mb-4 text-center">
+                            <a class="btn btn-warning rounded-3 px-4 py-2 shadow" asp-page="./ForgotPassword" asp-route-returnUrl="@Model.ReturnUrl">
+                                🔑 Forgot your password?
+                            </a>
+                        </div>
+                       
+                        <!-- Buttons -->
+                        <div class="d-flex justify-content-between">
+
+                            <!-- Cancel -->
+                            <a asp-controller="Info" asp-action="Index" class="btn btn-sm btn-secondary rounded-2 me-2 border-0 shadow" title="Cancel">
+                                ⬅️ Cancel
+                            </a>
+
+                            <!-- Log In -->                            
+                            <button id="login-submit" type="submit" class="btn btn-sm btn-success rounded-2 me-2 border-0 shadow">
+                                🔓 Log in
+                            </button>                            
+
+                        </div>   
+                    </form>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('password');
+            const togglePasswordButton = document.getElementById('togglePassword');
+            const passwordIcon = document.getElementById('passwordIcon');
+
+            togglePasswordButton.addEventListener('click', function() {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordIcon.textContent = '🔓';
+                // Eye icon already set
+                togglePasswordButton.style.backgroundColor = '#c8e6c9'; // Light green
+                togglePasswordButton.style.borderColor = '#a5d6a7';
+            } else {
+                passwordInput.type = 'password';
+                passwordIcon.textContent = '🙈';
+                // Eye-slash icon already set
+                togglePasswordButton.style.backgroundColor = '#ecb3b8'; // Darker light red
+                togglePasswordButton.style.borderColor = '#e39aa0';
+            }
+            passwordInput.focus();
+        });
+        });
+    </script>
+}

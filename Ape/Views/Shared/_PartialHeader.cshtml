@@ -1,0 +1,121 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject Ape.Services.SecureConfigurationService ConfigService
+
+@{
+    string siteName = await ConfigService.GetCredentialAsync("SITE_NAME") ?? "Ape";
+}
+
+<header>
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom box-shadow mb-3">
+        <div class="container-fluid">
+            <a class="navbar-brand" asp-area="" asp-controller="Info" asp-action="Index">
+                <img style="height: 40px;" src="~/images/site/SmallLogo.png" /> @siteName
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="navbar-collapse collapse" id="navbarContent">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link text-light" asp-area="" asp-controller="Info" asp-action="Index">Home</a>
+                    </li>
+                    
+                    <!-- Manage Dropdown (Admin Only) -->
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
+                                Manage
+                            </a>
+                            <ul class="dropdown-menu ps-2" style="width: 250px;" data-bs-auto-close="outside">
+
+                                <!-- Manage Members -->
+                                <li><a class="dropdown-item" asp-area="Identity" asp-page="/Users">
+                                    👥 Members
+                                    </a>
+                                </li>
+                                <li><a class="dropdown-item" asp-controller="ActiveUsers" asp-action="Index">
+                                        <span class="icon-pair" aria-hidden="true"><span>👥</span><span>⚡</span></span>Active Members
+                                    </a>
+                                </li>                               
+
+                                <li><hr class="dropdown-divider" /></li>
+
+                                <!-- Email Configuration Sub-Dropdown -->
+                                <li class="nav-item dropdown">
+                                    <a class="dropdown-item dropdown-toggle" href="#" id="emailConfigDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
+                                        Email Configuration
+                                    </a>
+                                    <ul class="dropdown-menu ms-2 ps-2" style="width: 230px;" aria-labelledby="emailConfigDropdown" data-bs-auto-close="outside">
+                                        
+                                        <li><a class="dropdown-item" asp-controller="ContactFormSettings" asp-action="Index">Contact Form Recipients</a></li>
+                                        
+                                        <!-- Bar -->
+                                        <li><hr class="dropdown-divider mx-2" /></li>
+
+                                        <li><a class="dropdown-item" asp-controller="EmailTest" asp-action="Index">Email Test</a></li>
+                                        <li><a class="dropdown-item" asp-controller="EmailLog" asp-action="Index">Email Log</a></li>
+                                        
+                                    </ul>
+                                </li>
+
+                                <!-- Admin Tools Sub-Dropdown -->
+                                <li class="nav-item dropdown">
+                                    <a class="dropdown-item dropdown-toggle" href="#" id="adminToolsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
+                                        Admin Tools
+                                    </a>
+                                    <ul class="dropdown-menu ms-2 ps-2" style="width: 220px;" aria-labelledby="adminToolsDropdown" data-bs-auto-close="outside">
+                                        <li><a class="dropdown-item" asp-controller="SystemCredentials" asp-action="Index">System Credentials</a></li>
+                                        <li><a class="dropdown-item" asp-area="Identity" asp-page="/RoleManagement">Manage Roles</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Links" asp-action="ManageCategories">Manage Links</a></li>
+                                    </ul>
+                                </li>
+
+                                <li><hr class="dropdown-divider" /></li>
+
+                               @*  <!-- Content -->
+                                <li><a class="dropdown-item" asp-controller="Document" asp-action="Browse">Document Library</a></li> *@
+
+                            </ul>
+                        </li>
+                    }
+
+
+                    <!-- Members Dropdown -->
+                    @if (User.IsInRole("Member"))
+                    {
+                       
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Members
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">
+                                        Account Management
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li><a class="dropdown-item" asp-controller="Document" asp-action="Browse">Document Library</a></li>
+                                <li><a class="dropdown-item" asp-controller="Gallery" asp-action="Browse">Image Gallery</a></li>
+                                <li><a class="dropdown-item" asp-controller="Links" asp-action="MoreLinks">More Links</a></li>
+                            </ul>
+                        </li>
+                    }
+
+
+                    <!-- Contact -->
+                    <li class="nav-item">
+                        <a class="nav-link text-light" asp-controller="Info" asp-action="Contact">Contact</a>
+                    </li>
+
+                    <!-- Login-out -->
+                    <partial name="_LoginPartial" />
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>

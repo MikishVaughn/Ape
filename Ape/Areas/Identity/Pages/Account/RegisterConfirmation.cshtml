@@ -1,0 +1,74 @@
+@page
+@model RegisterConfirmationModel
+@inject Ape.Services.SecureConfigurationService ConfigService
+@{
+    ViewData["Title"] = "Register Confirmation";
+}
+
+<head>
+    <title>@ViewData["Title"]</title>
+</head>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card m-2 rounded p-4 shadow">
+                <h1 class="text-black mb-4 text-center">
+                    🧍✅ @ViewData["Title"]
+                </h1>
+                @{
+                    if (@Model.DisplayConfirmAccountLink)
+                    {                        
+                        <h3 class="text-black pb-4 text-center">Thank you for registering!</h3>
+                        <p class="text-info pb-1">
+                            <strong>✅ You're almost ready to start fishing!</strong>
+                        </p>
+
+                        <p class="text-black pb-3">
+                            <strong>Step 1: Check Your Email</strong><br />
+                            An email confirmation has been sent to your email address. Please click the confirmation link in the email to verify your account.
+                            If you don't see the email in your inbox, please check your Spam folder.
+                        </p>
+
+                        <p class="text-black pb-3">
+                            <strong>Step 2: Automatic Activation</strong><br />
+                            Once you click the confirmation link, your Ape Member account will be <strong>automatically activated</strong> – no waiting, no manual approval needed!
+                        </p>
+
+                        <p class="text-black pb-3">
+                            <strong>Step 3: Start Using Ape</strong><br />
+                            After confirming your email, you'll receive a welcome email with login instructions. You can then log in immediately and start using all Ape features!
+                        </p>
+
+                        <p class="text-black pb-2" style="font-size: 0.9em;">
+                            <em>(All emails will come from @(await ConfigService.GetCredentialAsync("SMTP_USERNAME")))</em>
+                        </p>
+
+                        <!-- Welcome -->
+                        <div class="alert alert-success mt-3">
+                            <h5 class="alert-heading">
+                                <i class="bi bi-globe-americas"></i> Welcome to the Community!
+                            </h5>
+                            <p class="mb-2">
+                                You're now part of a growing community.
+                            </p>
+                            <hr>                            
+                        </div>                         
+                    }
+                    else
+                    {
+                        // Handle the case where the confirmation link is not displayed
+                        <p class="text-black text-center">
+                            Thank you for registering!
+                        </p>
+                    }
+                }
+                <div class="d-flex justify-content-center mt-3">
+                    <a asp-controller="Info" asp-action="Index" class="btn btn-sm btn-success rounded-2 shadow" title="Continue to Next Section">
+                        Continue ➡️
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

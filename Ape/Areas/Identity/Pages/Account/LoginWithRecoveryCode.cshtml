@@ -1,0 +1,55 @@
+﻿@page
+@model LoginWithRecoveryCodeModel
+@{
+    ViewData["Title"] = "Recovery code verification";
+}
+
+<head>
+    <title>@ViewData["Title"]</title>
+</head>
+
+<div class="container my-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card m-4 rounded p-4 shadow">
+               
+                <h1 class="text-black mb-4 text-center">
+                    🔑 🔄 @ViewData["Title"]
+                </h1>
+                <p class="text-black text-center">
+                    You have requested to log in with a recovery code. This login will not be remembered until you provide
+                    an authenticator app code at log in or disable 2FA and log in again.
+                </p>
+
+                <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3 text-center" role="alert"></div>
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.RecoveryCode" class="form-control" autocomplete="off" placeholder="RecoveryCode" />
+                            <label asp-for="Input.RecoveryCode" class="form-label">Recovery Code</label>
+                            <span asp-validation-for="Input.RecoveryCode" class="text-danger"></span>
+                        </div>
+
+                        <!-- Butons -->
+                        <div class="d-flex justify-content-between">
+
+                            <!-- Cancel -->
+                        <a href="~/" class="btn btn-sm btn-secondary rounded-2 me-2 shadow">
+                                ⬅️ Cancel
+                            </a>
+
+                            <!-- Log In -->
+                        <button type="submit" class="btn btn-sm btn-success rounded-2 me-2 shadow">
+                                💾 Log in
+                            </button>                            
+
+                        </div>
+                    </form>
+               
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

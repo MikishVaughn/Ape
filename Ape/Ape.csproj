@@ -1,0 +1,82 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>aspnet-Ape-f477af0c-a3b7-4892-8091-75fd09bed4dc</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Areas\Identity\Pages\Account\AccessDeniedx.cshtml.cs" />
+    <Compile Remove="Areas\Identity\Pages\Account\ConfirmEmailChangex.cshtml.cs" />
+    <Compile Remove="Areas\Identity\Pages\Account\ConfirmEmailx.cshtml.cs" />
+    <Compile Remove="Areas\Identity\Pages\Account\ExternalLoginx.cshtml.cs" />
+    <Compile Remove="Areas\Identity\Pages\Account\ForgotPasswordConfirmationx.cshtml.cs" />
+    <Compile Remove="Areas\Identity\Pages\Account\ForgotPasswordx.cshtml.cs" />
+    <Compile Remove="Areas\Identity\Pages\Account\Lockoutx.cshtml.cs" />
+    <Compile Remove="Areas\Identity\Pages\Account\LoginWith2fax.cshtml.cs" />
+    <Compile Remove="Areas\Identity\Pages\Account\LoginWithRecoveryCodex.cshtml.cs" />
+    <Compile Remove="Areas\Identity\Pages\Account\Loginx.cshtml.cs" />
+    <Compile Remove="Areas\Identity\Pages\Account\Logoutx.cshtml.cs" />
+    <Compile Remove="Areas\Identity\Pages\Account\Manage\DeleteAccount.cshtml.cs" />
+    <Compile Remove="Areas\Identity\Pages\Account\Manage\DeletePersonalData.cshtml.cs" />
+    <Compile Remove="Areas\Identity\Pages\Account\Manage\Indexx.cshtml.cs" />
+    <Compile Remove="Areas\Identity\Pages\Account\Manage\ManageNavPagesx.cs" />
+    <Compile Remove="Areas\Identity\Pages\Account\Manage\PersonalDatax.cshtml.cs" />
+    <Compile Remove="Areas\Identity\Pages\Account\Manage\ResetAuthenticatorx.cshtml.cs" />
+    <Compile Remove="Areas\Identity\Pages\Account\Manage\SetPasswordx.cshtml.cs" />
+    <Compile Remove="Areas\Identity\Pages\Account\Manage\ShowRecoveryCodesx.cshtml.cs" />
+    <Compile Remove="Areas\Identity\Pages\Account\Manage\TwoFactorAuthenticationx.cshtml.cs" />
+    <Compile Remove="Areas\Identity\Pages\Account\RegisterConfirmationx.cshtml.cs" />
+    <Compile Remove="Areas\Identity\Pages\Account\Registerx.cshtml.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="Areas\Identity\Pages\Account\AccessDeniedx.cshtml" />
+    <Content Remove="Areas\Identity\Pages\Account\ConfirmEmailChangex.cshtml" />
+    <Content Remove="Areas\Identity\Pages\Account\ConfirmEmailx.cshtml" />
+    <Content Remove="Areas\Identity\Pages\Account\ExternalLoginx.cshtml" />
+    <Content Remove="Areas\Identity\Pages\Account\ForgotPasswordConfirmationx.cshtml" />
+    <Content Remove="Areas\Identity\Pages\Account\ForgotPasswordx.cshtml" />
+    <Content Remove="Areas\Identity\Pages\Account\Lockoutx.cshtml" />
+    <Content Remove="Areas\Identity\Pages\Account\LoginWith2fax.cshtml" />
+    <Content Remove="Areas\Identity\Pages\Account\LoginWithRecoveryCodex.cshtml" />
+    <Content Remove="Areas\Identity\Pages\Account\Loginx.cshtml" />
+    <Content Remove="Areas\Identity\Pages\Account\Logoutx.cshtml" />
+    <Content Remove="Areas\Identity\Pages\Account\Manage\DeleteAccount.cshtml" />
+    <Content Remove="Areas\Identity\Pages\Account\Manage\DeletePersonalData.cshtml" />
+    <Content Remove="Areas\Identity\Pages\Account\Manage\Indexx.cshtml" />
+    <Content Remove="Areas\Identity\Pages\Account\Manage\PersonalDatax.cshtml" />
+    <Content Remove="Areas\Identity\Pages\Account\Manage\ResetAuthenticatorx.cshtml" />
+    <Content Remove="Areas\Identity\Pages\Account\Manage\SetPasswordx.cshtml" />
+    <Content Remove="Areas\Identity\Pages\Account\Manage\ShowRecoveryCodesx.cshtml" />
+    <Content Remove="Areas\Identity\Pages\Account\Manage\TwoFactorAuthenticationx.cshtml" />
+    <Content Remove="Areas\Identity\Pages\Account\RegisterConfirmationx.cshtml" />
+    <Content Remove="Areas\Identity\Pages\Account\Registerx.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="ProtectedFiles\holder.txt">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.Communication.Email" Version="1.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="10.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.2" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="10.0.2" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\Galleries\" />
+  </ItemGroup>
+
+</Project>
