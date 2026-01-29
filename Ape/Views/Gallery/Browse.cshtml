@@ -391,9 +391,11 @@
 <div class="modal fade" id="lightboxModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content bg-dark border-0">
-            <div class="modal-header border-0 py-1">
-                <h6 class="modal-title text-white" id="lightboxTitle"></h6>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header border-0 py-2 px-3">
+                <h6 class="modal-title text-white text-truncate me-3" id="lightboxTitle" style="max-width: calc(100% - 50px);"></h6>
+                <button type="button" class="btn btn-outline-light btn-sm px-2 py-1" data-bs-dismiss="modal" aria-label="Close" style="font-size: 1.2rem; line-height: 1;">
+                    &times;
+                </button>
             </div>
             <div class="modal-body p-0 text-center">
                 <img id="lightboxImage" src="" alt="" class="img-fluid" style="max-height: 85vh; object-fit: contain;">
