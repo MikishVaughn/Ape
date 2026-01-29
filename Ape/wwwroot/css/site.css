@@ -260,7 +260,7 @@ main[role="main"] {
 
 .drag-drop-icon {
     font-size: 3rem;
-    color: #6c757d;
+    color: #595959; /* WCAG AA compliant contrast */
     margin-bottom: 1rem;
     transition: color 0.3s ease;
 }
@@ -280,7 +280,7 @@ main[role="main"] {
 }
 
 .drag-drop-subtitle {
-    color: #6c757d;
+    color: #595959; /* WCAG AA compliant contrast */
     margin-bottom: 1.5rem;
     font-size: 0.9rem;
 }
@@ -384,7 +384,8 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
 }
 
 .date-picker:focus {
-    outline: none;
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
 }
 
 /* Fix datepicker z-index to appear above Bootstrap modals and sticky headers */
@@ -783,6 +784,22 @@ textarea[aria-invalid="true"] {
     }
 }
 
+/* WCAG AA Color Contrast Fixes */
+/* Override Bootstrap's text-muted and text-secondary for better contrast (4.5:1 minimum) */
+.text-muted {
+    color: #595959 !important; /* Contrast ratio ~7:1 on white */
+}
+
+.text-secondary {
+    color: #545454 !important; /* Contrast ratio ~7.5:1 on white */
+}
+
+/* Ensure small text in cards has sufficient contrast */
+.card .text-muted,
+.card-body .text-muted {
+    color: #595959 !important;
+}
+
 /* #endregion ADA Compliance Styles */
 
 
@@ -806,6 +823,11 @@ textarea[aria-invalid="true"] {
 
     #top-button:hover {
         background-color: #4A4B4C; /* bg-gray-dark */
+    }
+
+    #top-button:focus {
+        outline: 2px solid #007bff;
+        outline-offset: 2px;
     }
 
     #top-button:active {

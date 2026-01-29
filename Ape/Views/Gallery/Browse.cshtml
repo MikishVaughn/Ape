@@ -32,7 +32,8 @@
     </div>
 }
 
-<div class="row">
+<div class="row mx-1">
+
     <!-- Sidebar: Category Tree -->
     <div class="col-md-3 col-lg-2">
         <div class="card shadow-sm mb-3">
@@ -665,7 +666,9 @@
         // ============================================================
 
         function openLightbox(imageUrl, title) {
-            document.getElementById('lightboxImage').src = imageUrl;
+            const img = document.getElementById('lightboxImage');
+            img.src = imageUrl;
+            img.alt = title || 'Gallery image';
             document.getElementById('lightboxTitle').textContent = title;
             new bootstrap.Modal(document.getElementById('lightboxModal')).show();
         }
