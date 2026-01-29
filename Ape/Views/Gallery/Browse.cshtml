@@ -655,7 +655,6 @@
 </div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
         const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
 
@@ -1123,46 +1122,6 @@
         }
 
         // ============================================================
-        // Drag-and-Drop Sort Order
-        // ============================================================
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const imagesGrid = document.getElementById('imagesGrid');
-            if (imagesGrid && document.querySelector('[data-image-id]')) {
-                Sortable.create(imagesGrid, {
-                    animation: 150,
-                    ghostClass: 'sortable-ghost',
-                    onEnd: function() { updateImageSortOrder(); }
-                });
-            }
-        });
-
-        function updateImageSortOrder() {
-            const items = document.querySelectorAll('#imagesGrid [data-image-id]');
-            const imageIds = [];
-            const sortOrders = [];
-
-            items.forEach((item, index) => {
-                const imageId = item.getAttribute('data-image-id');
-                if (imageId) {
-                    imageIds.push(parseInt(imageId));
-                    sortOrders.push(index + 1);
-                }
-            });
-
-            const formData = new FormData();
-            imageIds.forEach(id => formData.append('imageIds', id));
-            sortOrders.forEach(order => formData.append('sortOrders', order));
-            formData.append('__RequestVerificationToken', csrfToken);
-
-            fetch('@Url.Action("UpdateImageSortOrder", "Gallery")', { method: 'POST', body: formData })
-            .then(r => r.json())
-            .then(data => {
-                if (!data.success) console.error('Error updating sort order:', data.message);
-            });
-        }
-
-        // ============================================================
         // Upload System: Client-Side Resize + Sequential Upload
         // ============================================================
 
@@ -1514,9 +1473,6 @@
             font-weight: 500;
             color: #333;
         }
-        .sortable-ghost {
-            opacity: 0.4;
-        }
         #categoryTreeContainer {
             max-height: calc(100vh - 250px);
             overflow-y: auto;
@@ -1551,7 +1507,7 @@
                 width: 100%;
             }
             .card-body .btn-group {
-                flex-direction: column;
+                /* flex-direction: column; */
                 gap: 0.25rem;
             }
             .card-body .btn-group .btn {
