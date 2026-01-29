@@ -63,6 +63,9 @@
     <None Remove="ProtectedFiles\04-Document-Gallery-Guide.pdf" />
     <None Remove="ProtectedFiles\05-Security-Guide.pdf" />
     <None Remove="ProtectedFiles\06-Deployment-Guide.pdf" />
+    <None Remove="ProtectedFiles\07-Contact-Form-Guide.pdf" />
+    <None Remove="ProtectedFiles\08-Directory-Structure-Guide.pdf" />
+    <None Remove="ProtectedFiles\09-Database-Schema.pdf" />
   </ItemGroup>
 
   <ItemGroup>

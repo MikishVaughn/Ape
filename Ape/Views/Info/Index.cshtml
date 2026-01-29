@@ -16,6 +16,40 @@
         }
     }
 
+    .bananna {
+        image-rendering: pixelated;
+        max-height: 128px; /* Large screens */
+    }
+
+    .banannaphone {
+        display: none;
+    }
+
+    @@media (max-width: 576px) {
+        .banannaphone {
+            display: inline;
+            max-height: 116px; /* Phone screens */
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .bananna {
+            display: none;
+            max-height: 72px; /* Phone screens */
+        }
+    }
+
+    .vsicon {
+        image-rendering: pixelated;
+        max-height: 36px; /* Large screens */
+    }
+
+    @@media (max-width: 576px) {
+        .vsicon {            
+            max-height: 18px; /* Phone screens */
+        }
+    }
+
     /* Pulsating button style */
     .btn-pulse {
         display: inline-block;
@@ -45,23 +79,34 @@
 </style>
 
 <!-- Hero Section -->
-<div class="container mt-4 mb-5">
+<div class="container mt-0 mb-4">
+    <div class="row">
+        <div class="col-12 col-md-8 text-center text-md-end ">
+            <h1 class="display-5 fw-bold mb-2">Welcome to the<br />Ape framework for</h1>            
+        </div>
+        <div class="col-12 col-md-4 text-start">
+            <img class="bananna" src="~/images/site/bananna.png" />
+        </div>
+    </div>
+    
 
-    <h1 class="text-center display-5 fw-bold mb-2">Welcome to the<br />Ape framework</h1>
-
-    <div class="text-center mb-4">
+    <div class="text-center mb-2">
+        <h2>
+            <img class="text-center vsicon" src="~/images/site/vsicon.webp" /> Visual Studio
+        </h2>
         <a href="https://github.com/MikishVaughn/Ape" target="_blank" rel="noopener noreferrer"
            class="btn-pulse">
             <i class="bi bi-github me-2"></i>View on GitHub
         </a>
     </div>
 
-    <div class="row align-items-center">
+    <div class="container row align-items-center">
 
-        <div class="col-12 col-md-4 text-lg-end text-center mb-4 mb-md-0">
+        <div class="col-12 col-md-4 text-lg-end text-center mb-2 mb-md-0">
             <img src="~/images/site/Logo.png" alt="Ape mascot" class="img-fluid logo" />
+            <img class="banannaphone" src="~/images/site/bananna.png" />
         </div>
-
+        
         <div class="col-12 col-md-8" style="max-width: 620px;">
             <img class="w-100" src="~/images/site/mvc.png" />
             <p class="lead text-secondary mb-2">
