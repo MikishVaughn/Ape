@@ -11,7 +11,7 @@
                 <h2>More Links</h2>
                 <p>Useful links organized by category</p>
 
-                @if (User.IsInRole("Admin"))
+                @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
                 {
                     <div class="mt-3 text-center">
                         <a href="@Url.Action("ManageCategories", "Links")" class="btn btn-primary btn-sm mb-2 mx-1">
@@ -45,7 +45,7 @@
                 <div class="alert alert-warning">
                     <h4><i class="bi bi-exclamation-triangle"></i> Database Setup Required</h4>
                     <p><strong>@ViewBag.DatabaseError</strong></p>
-                    @if (User.IsInRole("Admin"))
+                    @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
                     {
                         <p>Please run the EF database migration to create the required tables.</p>
                     }
@@ -184,7 +184,7 @@
                     <h4><i class="bi bi-info-circle"></i> No Link Categories Found</h4>
                     <p class="mb-0">
                         No link categories have been created yet.
-                        @if (User.IsInRole("Admin"))
+                        @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
                         {
                             <text>Use the "Manage Categories" button above to create your first category.</text>
                         }

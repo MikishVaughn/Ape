@@ -5,6 +5,7 @@
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
 {
+    <!-- Logout -->
     <li class="nav-item">
         <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Info", new { area = "" })">
             <button type="submit" class="ps-0 rounded-0 nav-link btn btn-link text-light">Logout</button>
@@ -13,9 +14,12 @@
 }
 else
 {
+    <!-- Register -->
     <li class="nav-item">
         <a class="nav-link text-light" asp-area="Identity" asp-page="/Account/Register">Register</a>
     </li>
+
+    <!-- Login -->
     <li class="nav-item">
         <a class="nav-link text-light" asp-area="Identity" asp-page="/Account/Login">Login</a>
     </li>

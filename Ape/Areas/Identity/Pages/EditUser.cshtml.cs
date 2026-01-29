@@ -9,7 +9,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Ape.Areas.Identity.Pages
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Manager")]
     public class EditUserModel(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager, ApplicationDbContext dbContext) : PageModel
     {
         private readonly UserManager<IdentityUser> _userManager = userManager;

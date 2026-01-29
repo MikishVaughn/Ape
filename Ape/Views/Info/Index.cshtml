@@ -7,35 +7,35 @@
 <style>
     .logo {
         image-rendering: pixelated;
+        max-height: 128px; /* Large screens */
+    }
+
+    @@media (max-width: 768px) {
+        .logo {
+            display: none;
+            max-height: 72px; /* Phone screens */
+        }
+    }
+
+    .tree {
+        image-rendering: pixelated;
         max-height: 200px;  /* Large screens */
     }
 
-    @@media (max-width: 576px) {
-        .logo {
+    @@media (max-width: 768px) {
+        .tree {
             max-height: 120px;  /* Phone screens */
         }
     }
 
-    .bananna {
-        image-rendering: pixelated;
-        max-height: 128px; /* Large screens */
-    }
-
-    .banannaphone {
+    .treephone {
         display: none;
     }
 
-    @@media (max-width: 576px) {
-        .banannaphone {
+    @@media (max-width: 768px) {
+        .treephone {
             display: inline;
             max-height: 116px; /* Phone screens */
-        }
-    }
-
-    @@media (max-width: 576px) {
-        .bananna {
-            display: none;
-            max-height: 72px; /* Phone screens */
         }
     }
 
@@ -44,7 +44,7 @@
         max-height: 36px; /* Large screens */
     }
 
-    @@media (max-width: 576px) {
+    @@media (max-width: 768px) {
         .vsicon {            
             max-height: 18px; /* Phone screens */
         }
@@ -76,62 +76,108 @@
         50% { transform: scale(1.05); }
         100% { transform: scale(1); }
     }
+
+    .lead-1 {
+        font-size: 1.25rem;
+        font-weight: 500;
+    }
+
+    .lead-2 {
+        font-size: 1.25rem;
+        font-weight: 700;
+    }
+
 </style>
 
 <!-- Hero Section -->
 <div class="container mt-0 mb-4">
-    <div class="row">
+    <div class="container row justify-content-around">
+
+        <!-- Welcome -->
         <div class="col-12 col-md-8 text-center text-md-end ">
-            <h1 class="display-5 fw-bold mb-2">Welcome to the<br />Ape framework for</h1>            
+            <h1 class="display-5 fw-bold mb-0">Welcome to the<br />Ape framework</h1>            
         </div>
+
+        <!-- Logo Image -->
         <div class="col-12 col-md-4 text-start">
-            <img class="bananna" src="~/images/site/bananna.png" />
+            <img class="img-fluid logo" src="~/images/site/logo.png" />
         </div>
+
     </div>
     
 
     <div class="text-center mb-2">
-        <h2>
-            <img class="text-center vsicon" src="~/images/site/vsicon.webp" /> Visual Studio
-        </h2>
+
+        <!-- for -->
+        <h5 class="mb-0">for</h5>
+
+        <!-- Visual Studio -->
+        <h2><img class="text-center vsicon" src="~/images/site/vsicon.webp" /> Visual Studio</h2>
+
+        <!-- GitHub Button -->
         <a href="https://github.com/MikishVaughn/Ape" target="_blank" rel="noopener noreferrer"
-           class="btn-pulse">
+           class="btn-pulse my-2">
             <i class="bi bi-github me-2"></i>View on GitHub
         </a>
-    </div>
 
-    <div class="container row align-items-center">
-
-        <div class="col-12 col-md-4 text-lg-end text-center mb-2 mb-md-0">
-            <img src="~/images/site/Logo.png" alt="Ape mascot" class="img-fluid logo" />
-            <img class="banannaphone" src="~/images/site/bananna.png" />
-        </div>
-        
-        <div class="col-12 col-md-8" style="max-width: 620px;">
-            <img class="w-100" src="~/images/site/mvc.png" />
-            <p class="lead text-secondary mb-2">
-                A production-ready ASP.NET Core MVC framework with comprehensive authentication, 
-                role-based access control, document management, and administrative tools. This framework 
-                provides a solid foundation for building secure, enterprise-grade web applications.
-            </p>
-            
-            <div class="d-flex flex-wrap gap-2">
-                <span class="badge rounded-pill bg-dark px-3 py-2">C#</span>
-                <span class="badge rounded-pill bg-dark px-3 py-2">.NET Core</span>
-                <span class="badge rounded-pill bg-dark px-3 py-2">MVC</span>
-                <span class="badge rounded-pill bg-dark px-3 py-2">Entity Framework</span>
-                <span class="badge rounded-pill bg-dark px-3 py-2">SQL Server</span>
-                <span class="badge rounded-pill bg-dark px-3 py-2">Identity</span>
-            </div>
-        </div>
     </div>
 </div>
 
+<!-- First Card -->
+<div class="bg-light my-4 py-2 mx-auto" style="max-width: 1000px;">
+        <div class="container"> 
+            
+            <div class="row g-4">
+    
+                <div class="card shadow-sm w-100 col-12 col-sm-6 col-lg-4 p-4" style="background-color: lightgray;">
+
+                    <div class="container row">
+
+                        <div class="col-12 col-md-4 text-lg-end text-center mb-2 mb-md-0">
+
+                            <img class="img-fluid treephone" src="~/images/site/logo.png" />
+
+                            <img src="~/images/site/Bananna.png" alt="Ape mascot" class="img-fluid tree" />
+
+                        </div>
+
+                        <div class="col-12 col-md-8" style="max-width: 580px;">
+
+                            <img class="w-100 rounded-3" src="~/images/site/mvc.png" />
+
+                            <p class="lead-1 text-secondary my-2">
+                                A production-ready <b>ASP.NET Core MVC</b> framework with comprehensive authentication,
+                                role-based access control, document management, and administrative tools.
+                            </p>
+
+                            <p class="lead-2 text-secondary my-2">This framework provides a solid foundation for building secure, 
+                                enterprise-grade web applications.
+                            </p>
+
+                            <div class="text-center">
+                                <span class="badge rounded-pill bg-dark my-2 px-3 py-2">C#</span>
+                                <span class="badge rounded-pill bg-dark my-2 px-3 py-2">.NET Core</span>
+                                <span class="badge rounded-pill bg-dark my-2 px-3 py-2">MVC</span>
+                                <span class="badge rounded-pill bg-dark my-2 px-3 py-2">Entity Framework</span>
+                                <span class="badge rounded-pill bg-dark my-2 px-3 py-2">SQL Server</span>
+                                <span class="badge rounded-pill bg-dark my-2 px-3 py-2">Identity</span>
+                            </div>
+                        </div>               
+                
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
 <!-- Features Section -->
-<div class="rounded-3 bg-dark py-2 mx-auto" style="max-width: 1000px;">
-    <div class="container">
+<div class="bg-light mx-auto" style="max-width: 1000px;">
+    <div class="card shadow-sm py-2 w-100 container" style="background-color: black;">
         <h2 class="text-white text-center mb-2">Platform Features</h2>
-        <p class="text-center text-secondary mb-4">Built-in tools for managing members, content, and communications</p>
+        <p class="text-center text-white mb-4">Built-in tools for managing members, content, and communications</p>
 
         <div class="row g-4">
 

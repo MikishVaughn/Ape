@@ -2,24 +2,26 @@
 
 ## Introduction
 
-This guide covers all administrative features available to users with the Admin role. As an administrator, you have access to system configuration, user management, and content management tools.
+This guide covers all administrative features available to users with the **Admin** or **Manager** role. Both roles have access to system configuration, user management, and content management tools.
+
+**Key Difference:** The Manager role has the same access as Admin, except Managers **cannot access System Credentials**. This allows you to delegate administrative tasks while keeping sensitive configuration secure.
 
 ---
 
 ## Admin Menu Overview
 
-After logging in as an Admin, you'll see additional menu options:
+After logging in as an Admin or Manager, you'll see additional menu options:
 
-| Menu Item | Purpose |
-|-----------|---------|
-| System Credentials | Manage encrypted site credentials |
-| Email Test | Test email configuration |
-| Email Logs | View sent email history |
-| Active Users | Monitor user activity |
-| Contact Settings | Configure contact form recipients |
-| Documents | Manage PDF document library |
-| Gallery | Manage photo gallery |
-| More Links | Manage link categories |
+| Menu Item | Purpose | Admin | Manager |
+|-----------|---------|:-----:|:-------:|
+| System Credentials | Manage encrypted site credentials | ✓ | ✗ |
+| Email Test | Test email configuration | ✓ | ✓ |
+| Email Logs | View sent email history | ✓ | ✓ |
+| Active Users | Monitor user activity | ✓ | ✓ |
+| Contact Settings | Configure contact form recipients | ✓ | ✓ |
+| Documents | Manage PDF document library | ✓ | ✓ |
+| Gallery | Manage photo gallery | ✓ | ✓ |
+| More Links | Manage link categories | ✓ | ✓ |
 
 ---
 

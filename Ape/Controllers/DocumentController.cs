@@ -28,7 +28,7 @@ namespace Ape.Controllers
         public async Task<IActionResult> Browse(int? folderId)
         {
             var userAccessLevel = GetUserAccessLevel();
-            var canManage = User.IsInRole("Admin");
+            var canManage = User.IsInRole("Admin") || User.IsInRole("Manager");
 
             var viewModel = await _documentService.BuildExplorerViewModelAsync(
                 folderId, userAccessLevel, canManage, canManage);
@@ -82,7 +82,7 @@ namespace Ape.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> CreateFolder([FromBody] CreateFolderModel model)
         {
             if (string.IsNullOrWhiteSpace(model.Name))
@@ -99,7 +99,7 @@ namespace Ape.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> RenameFolder(int folderId, string newName)
         {
             var result = await _documentService.RenameFolderAsync(folderId, newName);
@@ -111,7 +111,7 @@ namespace Ape.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> UpdateFolderAccessLevel(int folderId, DocumentAccessLevel accessLevel)
         {
             var result = await _documentService.UpdateFolderAccessLevelAsync(folderId, accessLevel);
@@ -123,7 +123,7 @@ namespace Ape.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> MoveFolder(int folderId, int? targetFolderId)
         {
             var result = await _documentService.MoveFolderAsync(folderId, targetFolderId);
@@ -135,7 +135,7 @@ namespace Ape.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> DeleteFolder(int folderId, bool deleteContents = false)
         {
             var result = await _documentService.DeleteFolderAsync(folderId, deleteContents);
@@ -146,7 +146,7 @@ namespace Ape.Controllers
         /// Check if folder has contents (for delete confirmation)
         /// </summary>
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> FolderHasContents(int folderId)
         {
             var hasContents = await _documentService.FolderHasContentsAsync(folderId);
@@ -158,7 +158,7 @@ namespace Ape.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> UpdateFolderSortOrder(int[] folderIds, int[] sortOrders)
         {
             var result = await _documentService.UpdateFolderSortOrdersAsync(folderIds, sortOrders);
@@ -174,7 +174,7 @@ namespace Ape.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> UploadFile(int folderId, IFormFile file, string? description)
         {
             var userName = User.Identity?.Name ?? "Unknown";
@@ -198,7 +198,7 @@ namespace Ape.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> RenameFile(int fileId, string newFileName)
         {
             var result = await _documentService.RenameFileAsync(fileId, newFileName);
@@ -210,7 +210,7 @@ namespace Ape.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> UpdateFileDescription(int fileId, string? description)
         {
             var result = await _documentService.UpdateFileDescriptionAsync(fileId, description);
@@ -222,7 +222,7 @@ namespace Ape.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> MoveFile(int fileId, int targetFolderId)
         {
             var result = await _documentService.MoveFileAsync(fileId, targetFolderId);
@@ -234,7 +234,7 @@ namespace Ape.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> MoveFiles(int[] fileIds, int targetFolderId)
         {
             var result = await _documentService.MoveFilesAsync(fileIds, targetFolderId);
@@ -246,7 +246,7 @@ namespace Ape.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> DeleteFile(int fileId)
         {
             var result = await _documentService.DeleteFileAsync(fileId);
@@ -258,7 +258,7 @@ namespace Ape.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> UpdateFileSortOrder(int[] fileIds, int[] sortOrders)
         {
             var result = await _documentService.UpdateFileSortOrdersAsync(fileIds, sortOrders);
@@ -334,7 +334,7 @@ namespace Ape.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> CreateFolderForm(string folderName, int? parentFolderId, DocumentAccessLevel accessLevel)
         {
             var model = new CreateFolderModel
@@ -359,7 +359,7 @@ namespace Ape.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> DeleteFolderForm(int folderId, int? parentFolderId, bool deleteContents = false)
         {
             var result = await _documentService.DeleteFolderAsync(folderId, deleteContents);
@@ -377,7 +377,7 @@ namespace Ape.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> DeleteFileForm(int fileId, int folderId)
         {
             var result = await _documentService.DeleteFileAsync(fileId);

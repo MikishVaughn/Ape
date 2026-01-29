@@ -7,7 +7,7 @@
     ViewData["Title"] = "Manage Members";
 }
 
-@if (SignInManager.IsSignedIn(User) && User.IsInRole("Admin"))
+@if (SignInManager.IsSignedIn(User) && (User.IsInRole("Admin") || User.IsInRole("Manager")))
 {
     <div class="my-4">
         <div class="row justify-content-center m-0 p-0">

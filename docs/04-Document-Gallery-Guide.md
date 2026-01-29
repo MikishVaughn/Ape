@@ -49,7 +49,9 @@ Documents/
 3. Click a document to view it in-browser
 4. Click **Download** to save a local copy
 
-### For Administrators (Managing Documents)
+### For Administrators and Managers (Managing Documents)
+
+Both Admin and Manager roles have full document management capabilities.
 
 #### Creating Folders
 
@@ -151,7 +153,9 @@ Gallery/
 3. Click thumbnails to view full-size images
 4. Navigate with breadcrumbs
 
-### For Administrators (Managing Gallery)
+### For Administrators and Managers (Managing Gallery)
+
+Both Admin and Manager roles have full gallery management capabilities.
 
 #### Creating Categories
 
@@ -277,7 +281,7 @@ Links/
 2. Browse categories
 3. Click links to open in new tab
 
-### For Administrators
+### For Administrators and Managers
 
 #### Managing Categories
 

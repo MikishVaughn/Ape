@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ape.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Manager")]
     public class ActiveUsersController(
         ApplicationDbContext context,
         UserManager<IdentityUser> userManager) : Controller

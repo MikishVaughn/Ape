@@ -41,7 +41,7 @@
                             Roles
                         </a>
 
-                        @if (User.IsInRole("Admin"))
+                        @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
                         {
                             @if (Model.Input.IsActive)
                             {

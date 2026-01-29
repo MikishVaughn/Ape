@@ -10,7 +10,7 @@ A production-ready ASP.NET Core MVC framework with comprehensive authentication,
 
 ### Authentication & Authorization
 - **ASP.NET Core Identity** with full user management
-- **Role-Based Access Control** (Admin, Member roles pre-configured)
+- **Role-Based Access Control** (Admin, Manager, Member roles pre-configured)
 - **Two-Factor Authentication (2FA)** with authenticator app support
 - **Email Verification** for new accounts
 - **Password Reset** via email
@@ -212,7 +212,8 @@ After logging in as Admin, navigate to **System Credentials** to configure email
 
 #### Managing Users
 - User management is handled through ASP.NET Core Identity
-- Users can be assigned to Admin or Member roles
+- Users can be assigned to Admin, Manager, or Member roles
+- **Manager role** has the same access as Admin except for System Credentials
 - View active users in the **Active Users** dashboard
 
 #### Document Library
@@ -305,7 +306,7 @@ Ape/
 
 ### Identity Tables
 - `AspNetUsers` - User accounts
-- `AspNetRoles` - Roles (Admin, Member)
+- `AspNetRoles` - Roles (Admin, Manager, Member)
 - `AspNetUserRoles` - User-role assignments
 - `AspNetUserClaims`, `AspNetRoleClaims` - Claims
 - `AspNetUserLogins`, `AspNetUserTokens` - External logins, tokens

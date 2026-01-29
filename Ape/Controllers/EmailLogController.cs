@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ape.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Manager")]
     public class EmailLogController : Controller
     {
         private readonly ILogger<EmailLogController> _logger;

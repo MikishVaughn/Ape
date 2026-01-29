@@ -28,7 +28,7 @@ namespace Ape.Controllers
             if (pageSize > 48) pageSize = 48;
 
             var userAccessLevel = GetUserAccessLevel();
-            var canManage = User.IsInRole("Admin");
+            var canManage = User.IsInRole("Admin") || User.IsInRole("Manager");
 
             var viewModel = await _galleryService.BuildBrowseViewModelAsync(
                 categoryId, userAccessLevel, canManage, page, pageSize);
@@ -68,7 +68,7 @@ namespace Ape.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> CreateCategory([FromBody] CreateGalleryCategoryModel model)
         {
             if (string.IsNullOrWhiteSpace(model.Name))
@@ -82,7 +82,7 @@ namespace Ape.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> RenameCategory(int categoryId, string newName)
         {
             var result = await _galleryService.RenameCategoryAsync(categoryId, newName);
@@ -91,7 +91,7 @@ namespace Ape.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> UpdateCategoryAccessLevel(int categoryId, DocumentAccessLevel accessLevel)
         {
             var result = await _galleryService.UpdateCategoryAccessLevelAsync(categoryId, accessLevel);
@@ -100,7 +100,7 @@ namespace Ape.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> UpdateCategoryDescription(int categoryId, string? description)
         {
             var result = await _galleryService.UpdateCategoryDescriptionAsync(categoryId, description);
@@ -109,7 +109,7 @@ namespace Ape.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> MoveCategory(int categoryId, int? targetCategoryId)
         {
             var result = await _galleryService.MoveCategoryAsync(categoryId, targetCategoryId);
@@ -118,7 +118,7 @@ namespace Ape.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> DeleteCategory(int categoryId, bool deleteContents = false)
         {
             var result = await _galleryService.DeleteCategoryAsync(categoryId, deleteContents);
@@ -126,7 +126,7 @@ namespace Ape.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> CategoryHasContents(int categoryId)
         {
             var hasContents = await _galleryService.CategoryHasContentsAsync(categoryId);
@@ -135,7 +135,7 @@ namespace Ape.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> UpdateCategorySortOrder(int[] categoryIds, int[] sortOrders)
         {
             var result = await _galleryService.UpdateCategorySortOrdersAsync(categoryIds, sortOrders);
@@ -148,7 +148,7 @@ namespace Ape.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> UploadImages(int categoryId, IList<IFormFile> files, string? description)
         {
             var userName = User.Identity?.Name ?? "Unknown";
@@ -169,7 +169,7 @@ namespace Ape.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> UploadSingleImage(int categoryId, IFormFile file, string? description)
         {
             var userName = User.Identity?.Name ?? "Unknown";
@@ -179,7 +179,7 @@ namespace Ape.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> RenameImage(int imageId, string newName)
         {
             var result = await _galleryService.RenameImageAsync(imageId, newName);
@@ -188,7 +188,7 @@ namespace Ape.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> UpdateImageDescription(int imageId, string? description)
         {
             var result = await _galleryService.UpdateImageDescriptionAsync(imageId, description);
@@ -197,7 +197,7 @@ namespace Ape.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> MoveImage(int imageId, int targetCategoryId)
         {
             var result = await _galleryService.MoveImageAsync(imageId, targetCategoryId);
@@ -206,7 +206,7 @@ namespace Ape.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> MoveImages(int[] imageIds, int targetCategoryId)
         {
             var result = await _galleryService.MoveImagesAsync(imageIds, targetCategoryId);
@@ -215,7 +215,7 @@ namespace Ape.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> DeleteImages(int[] imageIds)
         {
             var result = await _galleryService.DeleteImagesAsync(imageIds);
@@ -224,7 +224,7 @@ namespace Ape.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> DeleteImage(int imageId)
         {
             var result = await _galleryService.DeleteImageAsync(imageId);
@@ -233,7 +233,7 @@ namespace Ape.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> UpdateImageSortOrder(int[] imageIds, int[] sortOrders)
         {
             var result = await _galleryService.UpdateImageSortOrdersAsync(imageIds, sortOrders);
@@ -246,7 +246,7 @@ namespace Ape.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> CreateCategoryForm(string categoryName, int? parentCategoryId, DocumentAccessLevel accessLevel, string? description)
         {
             var model = new CreateGalleryCategoryModel
@@ -269,7 +269,7 @@ namespace Ape.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> DeleteCategoryForm(int categoryId, int? parentCategoryId, bool deleteContents = false)
         {
             var result = await _galleryService.DeleteCategoryAsync(categoryId, deleteContents);
@@ -284,7 +284,7 @@ namespace Ape.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> DeleteImageForm(int imageId, int categoryId)
         {
             var result = await _galleryService.DeleteImageAsync(imageId);

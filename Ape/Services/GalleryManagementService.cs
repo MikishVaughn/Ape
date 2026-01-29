@@ -619,13 +619,28 @@ namespace Ape.Services
                 return GalleryImageOperationResult.Failed("Image not found.");
             }
 
-            image.OriginalFileName = newOriginalName.Trim();
+            var trimmedName = newOriginalName.Trim();
+
+            // Preserve the original file extension if user didn't include it
+            var originalExtension = Path.GetExtension(image.OriginalFileName ?? image.FileName);
+            if (!string.IsNullOrEmpty(originalExtension))
+            {
+                var newExtension = Path.GetExtension(trimmedName);
+                if (string.IsNullOrEmpty(newExtension) ||
+                    !newExtension.Equals(originalExtension, StringComparison.OrdinalIgnoreCase))
+                {
+                    // Remove any incorrect extension and append the original one
+                    trimmedName = Path.GetFileNameWithoutExtension(trimmedName) + originalExtension;
+                }
+            }
+
+            image.OriginalFileName = trimmedName;
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Renamed gallery image display name to '{NewName}' (ID: {ImageId})",
-                newOriginalName, imageId);
+                trimmedName, imageId);
 
-            return GalleryImageOperationResult.Succeeded(imageId, $"Image renamed to '{newOriginalName}'.");
+            return GalleryImageOperationResult.Succeeded(imageId, $"Image renamed to '{trimmedName}'.");
         }
 
         public async Task<GalleryImageOperationResult> UpdateImageDescriptionAsync(int imageId, string? description)

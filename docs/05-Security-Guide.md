@@ -99,19 +99,25 @@ To rotate the master key:
 
 ### Role-Based Authorization
 
-Two built-in roles:
+Three built-in roles:
 
 | Role | Access Level |
 |------|--------------|
-| Admin | Full system access |
+| Admin | Full system access including System Credentials |
+| Manager | Same as Admin, except no access to System Credentials |
 | Member | Limited to member-accessible content |
 
 ### Authorization Attributes
 
 Controllers use `[Authorize]` attributes:
 ```csharp
+// Admin-only (e.g., System Credentials)
 [Authorize(Roles = "Admin")]
 public class SystemCredentialsController
+
+// Admin and Manager access (most management features)
+[Authorize(Roles = "Admin,Manager")]
+public class GalleryController
 ```
 
 ### Content Access Levels
@@ -316,7 +322,7 @@ Sensitive values stored in environment:
 ### User Management
 
 - [ ] Remove unused accounts
-- [ ] Review admin role assignments
+- [ ] Review Admin and Manager role assignments
 - [ ] Encourage 2FA adoption
 - [ ] Document account recovery process
 

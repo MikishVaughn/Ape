@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Ape.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Manager")]
     public class ContactFormSettingsController(
         ISystemSettingsService systemSettingsService,
         ILogger<ContactFormSettingsController> logger) : Controller

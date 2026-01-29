@@ -8,7 +8,7 @@ using System.Linq.Expressions;
 
 namespace Ape.Areas.Identity.Pages
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Manager")]
     public class UsersModel(UserManager<IdentityUser> userManager, ApplicationDbContext dbContext) : PageModel
     {
         private readonly UserManager<IdentityUser> _userManager = userManager;

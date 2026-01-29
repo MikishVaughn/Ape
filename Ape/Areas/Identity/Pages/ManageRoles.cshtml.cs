@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ape.Areas.Identity.Pages
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Manager")]
     public class ManageRolesModel(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager) : PageModel
     {
         private readonly UserManager<IdentityUser> _userManager = userManager;

@@ -17,7 +17,7 @@ namespace Ape.Controllers
             try
             {
                 var categories = await _context.LinkCategories
-                                       .Where(c => !c.IsAdminOnly || User.IsInRole("Admin"))
+                                       .Where(c => !c.IsAdminOnly || User.IsInRole("Admin") || User.IsInRole("Manager"))
                                        .Include(c => c.CategoryLinks)
                                        .OrderBy(c => c.SortOrder)
                                        .ThenBy(c => c.CategoryName)
@@ -43,7 +43,7 @@ namespace Ape.Controllers
         }
 
         // GET: /Links/ManageCategories - Admin only
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> ManageCategories()
         {
             try
@@ -66,7 +66,7 @@ namespace Ape.Controllers
         }
 
         // GET: /Links/ManageLinks/{categoryId} - Admin only
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> ManageLinks(int? categoryId)
         {
             var categories = await _context.LinkCategories
@@ -101,7 +101,7 @@ namespace Ape.Controllers
 
         // POST: /Links/CreateCategory - Admin only
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateCategory(string categoryName, bool isAdminOnly = false)
         {
@@ -141,7 +141,7 @@ namespace Ape.Controllers
 
         // POST: /Links/CreateLink - Admin only
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateLink(int categoryId, string linkName, string linkUrl)
         {
@@ -188,7 +188,7 @@ namespace Ape.Controllers
 
         // POST: /Links/UpdateCategorySortOrder - Admin only
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateCategorySortOrder(int categoryId, string direction)
         {
@@ -219,7 +219,7 @@ namespace Ape.Controllers
 
         // POST: /Links/UpdateLinkSortOrder - Admin only
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateLinkSortOrder(int linkId, string direction)
         {
@@ -251,7 +251,7 @@ namespace Ape.Controllers
 
         // POST: /Links/DeleteCategory - Admin only
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteCategory(int categoryId)
         {
@@ -273,7 +273,7 @@ namespace Ape.Controllers
 
         // POST: /Links/DeleteLink - Admin only
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteLink(int linkId)
         {
@@ -294,7 +294,7 @@ namespace Ape.Controllers
 
         // POST: /Links/UpdateLink - Admin only
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateLink(int linkId, string linkName, string linkUrl)
         {
@@ -328,7 +328,7 @@ namespace Ape.Controllers
 
         // POST: /Links/UpdateCategoriesSortOrder - Batch update for drag-and-drop
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateCategoriesSortOrder(int[] categoryIds, int[] sortOrders)
         {
@@ -359,7 +359,7 @@ namespace Ape.Controllers
 
         // POST: /Links/UpdateLinksSortOrder - Batch update for drag-and-drop
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Manager")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateLinksSortOrder(int[] linkIds, int[] sortOrders)
         {

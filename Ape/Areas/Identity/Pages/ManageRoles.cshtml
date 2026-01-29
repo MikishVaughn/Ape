@@ -5,7 +5,7 @@
     ViewData["Title"] = "Manage User Roles";
 }
 
-@if (User.IsInRole("Admin"))
+@if (User.IsInRole("Admin") || User.IsInRole("Manager"))
 {
     <div class="container my-4">
         <div class="row justify-content-center">

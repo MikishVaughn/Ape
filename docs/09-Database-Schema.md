@@ -37,7 +37,7 @@ This document provides the complete database schema for the Ape Framework. The S
 -- SECTION 1: ASP.NET IDENTITY TABLES
 -- =====================================================
 
--- AspNetRoles - Stores roles (Admin, Member)
+-- AspNetRoles - Stores roles (Admin, Manager, Member)
 CREATE TABLE [dbo].[AspNetRoles] (
     [Id] NVARCHAR(450) NOT NULL,
     [Name] NVARCHAR(256) NULL,
@@ -400,6 +400,7 @@ GO
 INSERT INTO [dbo].[AspNetRoles] ([Id], [Name], [NormalizedName], [ConcurrencyStamp])
 VALUES
     (NEWID(), 'Admin', 'ADMIN', NEWID()),
+    (NEWID(), 'Manager', 'MANAGER', NEWID()),
     (NEWID(), 'Member', 'MEMBER', NEWID());
 GO
 
@@ -483,7 +484,7 @@ GO
 | Table | Purpose |
 |-------|---------|
 | AspNetUsers | User accounts with email, password hash, 2FA settings |
-| AspNetRoles | Role definitions (Admin, Member) |
+| AspNetRoles | Role definitions (Admin, Manager, Member) |
 | AspNetUserRoles | User-to-role assignments |
 | AspNetUserClaims | Claims associated with users |
 | AspNetRoleClaims | Claims associated with roles |
