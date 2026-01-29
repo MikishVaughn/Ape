@@ -744,6 +744,39 @@ namespace Ape.Services
             return GalleryImageOperationResult.Succeeded(imageId, $"Image '{originalName}' deleted successfully.");
         }
 
+        public async Task<GalleryImageOperationResult> DeleteImagesAsync(int[] imageIds)
+        {
+            if (imageIds == null || imageIds.Length == 0)
+            {
+                return GalleryImageOperationResult.Failed("No images specified.");
+            }
+
+            var images = await _context.GalleryImages
+                .Where(i => imageIds.Contains(i.ImageID))
+                .ToListAsync();
+
+            if (!images.Any())
+            {
+                return GalleryImageOperationResult.Failed("No images found.");
+            }
+
+            int deletedCount = 0;
+            foreach (var image in images)
+            {
+                var fileName = image.FileName;
+                _context.GalleryImages.Remove(image);
+                DeletePhysicalImage(fileName);
+                deletedCount++;
+            }
+
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Bulk deleted {Count} gallery images", deletedCount);
+
+            return GalleryImageOperationResult.UploadResult(deletedCount, 0,
+                $"{deletedCount} image(s) deleted successfully.");
+        }
+
         public async Task<GalleryImageOperationResult> UpdateImageSortOrdersAsync(int[] imageIds, int[] sortOrders)
         {
             if (imageIds.Length != sortOrders.Length)

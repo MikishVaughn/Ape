@@ -19,6 +19,7 @@ namespace Ape.Controllers
         // ============================================================
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> Browse(int? categoryId, int page = 1, int pageSize = 24)
         {
             // Clamp pagination values
@@ -44,6 +45,7 @@ namespace Ape.Controllers
         // ============================================================
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetCategoryTree(int? selectedCategoryId)
         {
             var userAccessLevel = GetUserAccessLevel();
@@ -52,6 +54,7 @@ namespace Ape.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetCategories(int? parentCategoryId)
         {
             var userAccessLevel = GetUserAccessLevel();
@@ -207,6 +210,15 @@ namespace Ape.Controllers
         public async Task<IActionResult> MoveImages(int[] imageIds, int targetCategoryId)
         {
             var result = await _galleryService.MoveImagesAsync(imageIds, targetCategoryId);
+            return Json(new { success = result.Success, message = result.Message });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteImages(int[] imageIds)
+        {
+            var result = await _galleryService.DeleteImagesAsync(imageIds);
             return Json(new { success = result.Success, message = result.Message });
         }
 

@@ -133,12 +133,16 @@
                                     @if (Model.CanManage)
                                     {
                                         <div class="card-footer bg-transparent border-0 py-1">
-                                            <div class="row row-cols-2 g-3">
-                                                <button type="button" class="btn btn-outline-secondary btn-edit-category"
+                                            <div class="btn-group btn-group-sm w-100" role="group">
+                                                <button type="button" class="btn btn-outline-secondary"
                                                         onclick="showEditCategoryModal(@category.CategoryId, '@category.Name.Replace("'", "\\'")', @((int)category.AccessLevel), '@(category.Description?.Replace("'", "\\'") ?? "")');">
                                                     Edit
                                                 </button>
-                                                <button type="button" class="btn btn-outline-danger btn-delete-category"
+                                                <button type="button" class="btn btn-outline-secondary"
+                                                        onclick="showMoveCategoryModal(@category.CategoryId, '@category.Name.Replace("'", "\\'")', @(category.ParentCategoryId?.ToString() ?? "null"));">
+                                                    Move
+                                                </button>
+                                                <button type="button" class="btn btn-outline-danger"
                                                         onclick="confirmDeleteCategory(@category.CategoryId, '@category.Name.Replace("'", "\\'")');">
                                                     Delete
                                                 </button>
@@ -168,6 +172,30 @@
                                 <span class="badge bg-secondary">Page @Model.CurrentPage of @Model.TotalPages</span>
                             }
                         </div>
+
+                        @if (Model.CanManage)
+                        {
+                            <!-- Bulk Actions Bar -->
+                            <div class="mb-3 p-2 bg-light rounded d-none" id="bulkActionsBar">
+                                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                    <div>
+                                        <input type="checkbox" class="form-check-input me-2" id="selectAllImages" onclick="toggleSelectAll(this)" title="Select all on this page">
+                                        <span class="text-muted"><span id="selectedCount">0</span> image(s) selected</span>
+                                    </div>
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-primary" onclick="showBulkMoveModal()">
+                                            <i class="bi bi-folder-symlink"></i> Move Selected
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger" onclick="confirmBulkDelete()">
+                                            <i class="bi bi-trash"></i> Delete Selected
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary" onclick="clearSelection()">
+                                            Clear
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
 
                         <!-- Pagination Controls (Top) -->
                         @if (Model.TotalPages > 1)
@@ -240,6 +268,12 @@
                             {
                                 <div class="col-12 col-md-6 col-lg-4 col-xl-3" data-image-id="@image.ImageId">
                                     <div class="card gallery-card h-100 shadow-sm">
+                                        @if (Model.CanManage)
+                                        {
+                                            <div class="image-checkbox-overlay">
+                                                <input type="checkbox" class="form-check-input image-checkbox" value="@image.ImageId" onclick="updateSelection(event)" title="Select image">
+                                            </div>
+                                        }
                                         <a href="#" onclick="openLightbox('@image.ImageUrl', '@(image.OriginalFileName?.Replace("'", "\\'") ?? image.FileName)'); return false;">
                                             <div class="gallery-image-container">
                                                 <img src="@image.ThumbnailUrl"
@@ -500,6 +534,32 @@
     </div>
 </div>
 
+<!-- Move Category Modal -->
+<div class="modal fade" id="moveCategoryModal" tabindex="-1" aria-labelledby="moveCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="moveCategoryModalLabel">Move Category</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="moveCategoryId" />
+                <input type="hidden" id="moveCategoryCurrentParent" />
+                <p>Moving: <strong id="moveCategoryName"></strong></p>
+                <div class="mb-3">
+                    <label for="targetParentCategoryId" class="form-label">Select New Location</label>
+                    <select class="form-select" id="targetParentCategoryId"></select>
+                    <div class="form-text">Select "Gallery Root" to move this category to the top level.</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="moveCategory()">Move Category</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Edit Image Modal -->
 <div class="modal fade" id="editImageModal" tabindex="-1" aria-labelledby="editImageModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -547,6 +607,29 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" onclick="moveImage()">Move Image</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Move Images Modal -->
+<div class="modal fade" id="bulkMoveModal" tabindex="-1" aria-labelledby="bulkMoveModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bulkMoveModalLabel">Move Selected Images</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Moving <strong id="bulkMoveCount">0</strong> image(s)</p>
+                <div class="mb-3">
+                    <label for="bulkTargetCategoryId" class="form-label">Select Target Category</label>
+                    <select class="form-select" id="bulkTargetCategoryId"></select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="bulkMoveImages()">Move Images</button>
             </div>
         </div>
     </div>
@@ -698,6 +781,72 @@
             .catch(() => alert('Error deleting category.'));
         }
 
+        function showMoveCategoryModal(categoryId, categoryName, currentParentId) {
+            document.getElementById('moveCategoryId').value = categoryId;
+            document.getElementById('moveCategoryName').textContent = categoryName;
+            document.getElementById('moveCategoryCurrentParent').value = currentParentId || '';
+
+            fetch('@Url.Action("GetCategoryTree", "Gallery")')
+            .then(r => r.json())
+            .then(tree => {
+                const select = document.getElementById('targetParentCategoryId');
+                select.innerHTML = '';
+
+                // Add root option
+                const rootOption = document.createElement('option');
+                rootOption.value = '';
+                rootOption.textContent = '📁 Gallery Root (Top Level)';
+                if (!currentParentId) {
+                    rootOption.disabled = true;
+                    rootOption.textContent += ' (current)';
+                }
+                select.appendChild(rootOption);
+
+                // Add category options
+                function addOptions(nodes, level = 0) {
+                    nodes.forEach(node => {
+                        // Skip the category being moved and its children
+                        if (node.categoryId == categoryId) return;
+
+                        const option = document.createElement('option');
+                        option.value = node.categoryId;
+                        option.textContent = '\u00A0\u00A0'.repeat(level + 1) + '📁 ' + node.name;
+                        if (node.categoryId == currentParentId) {
+                            option.disabled = true;
+                            option.textContent += ' (current)';
+                        }
+                        select.appendChild(option);
+                        if (node.children && node.children.length) {
+                            addOptions(node.children, level + 1);
+                        }
+                    });
+                }
+
+                addOptions(tree);
+                new bootstrap.Modal(document.getElementById('moveCategoryModal')).show();
+            });
+        }
+
+        function moveCategory() {
+            const categoryId = document.getElementById('moveCategoryId').value;
+            const targetParentId = document.getElementById('targetParentCategoryId').value;
+
+            const formData = new FormData();
+            formData.append('categoryId', categoryId);
+            if (targetParentId) {
+                formData.append('targetCategoryId', targetParentId);
+            }
+            formData.append('__RequestVerificationToken', csrfToken);
+
+            fetch('@Url.Action("MoveCategory", "Gallery")', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) window.location.reload();
+                else alert('Error: ' + data.message);
+            })
+            .catch(() => alert('Error moving category.'));
+        }
+
         // ============================================================
         // Image Operations
         // ============================================================
@@ -817,6 +966,160 @@
                 else alert('Error: ' + data.message);
             })
             .catch(() => alert('Error deleting image.'));
+        }
+
+        // ============================================================
+        // Multi-Select Image Operations
+        // ============================================================
+
+        // Get all selected image IDs
+        function getSelectedImageIds() {
+            const checkboxes = document.querySelectorAll('.image-checkbox:checked');
+            return Array.from(checkboxes).map(cb => parseInt(cb.value));
+        }
+
+        // Update selection count and show/hide bulk actions bar
+        function updateSelection(event) {
+            if (event) event.stopPropagation();
+
+            const selectedIds = getSelectedImageIds();
+            const count = selectedIds.length;
+            const bulkBar = document.getElementById('bulkActionsBar');
+            const countSpan = document.getElementById('selectedCount');
+            const selectAllCheckbox = document.getElementById('selectAllImages');
+
+            if (countSpan) countSpan.textContent = count;
+
+            if (bulkBar) {
+                if (count > 0) {
+                    bulkBar.classList.remove('d-none');
+                } else {
+                    bulkBar.classList.add('d-none');
+                }
+            }
+
+            // Update "select all" checkbox state
+            if (selectAllCheckbox) {
+                const allCheckboxes = document.querySelectorAll('.image-checkbox');
+                selectAllCheckbox.checked = allCheckboxes.length > 0 && allCheckboxes.length === count;
+                selectAllCheckbox.indeterminate = count > 0 && count < allCheckboxes.length;
+            }
+        }
+
+        // Toggle select all checkboxes
+        function toggleSelectAll(checkbox) {
+            const allCheckboxes = document.querySelectorAll('.image-checkbox');
+            allCheckboxes.forEach(cb => cb.checked = checkbox.checked);
+            updateSelection();
+        }
+
+        // Clear all selections
+        function clearSelection() {
+            const allCheckboxes = document.querySelectorAll('.image-checkbox');
+            allCheckboxes.forEach(cb => cb.checked = false);
+            const selectAllCheckbox = document.getElementById('selectAllImages');
+            if (selectAllCheckbox) selectAllCheckbox.checked = false;
+            updateSelection();
+        }
+
+        // Show bulk move modal
+        function showBulkMoveModal() {
+            const selectedIds = getSelectedImageIds();
+            if (selectedIds.length === 0) {
+                alert('Please select at least one image.');
+                return;
+            }
+
+            document.getElementById('bulkMoveCount').textContent = selectedIds.length;
+
+            // Load available categories
+            const currentCategoryId = @(Model.CurrentCategoryId ?? 0);
+            fetch('@Url.Action("GetCategoryTree", "Gallery")')
+            .then(r => r.json())
+            .then(tree => {
+                const select = document.getElementById('bulkTargetCategoryId');
+                select.innerHTML = '';
+
+                function addOptions(nodes, level = 0) {
+                    nodes.forEach(node => {
+                        const option = document.createElement('option');
+                        option.value = node.categoryId;
+                        option.textContent = '\u00A0\u00A0'.repeat(level) + node.name;
+                        if (node.categoryId == currentCategoryId) {
+                            option.disabled = true;
+                            option.textContent += ' (current)';
+                        }
+                        select.appendChild(option);
+                        if (node.children && node.children.length) {
+                            addOptions(node.children, level + 1);
+                        }
+                    });
+                }
+
+                addOptions(tree);
+                new bootstrap.Modal(document.getElementById('bulkMoveModal')).show();
+            });
+        }
+
+        // Execute bulk move
+        function bulkMoveImages() {
+            const selectedIds = getSelectedImageIds();
+            const targetCategoryId = document.getElementById('bulkTargetCategoryId').value;
+
+            if (selectedIds.length === 0) {
+                alert('No images selected.');
+                return;
+            }
+
+            const formData = new FormData();
+            selectedIds.forEach(id => formData.append('imageIds', id));
+            formData.append('targetCategoryId', targetCategoryId);
+            formData.append('__RequestVerificationToken', csrfToken);
+
+            fetch('@Url.Action("MoveImages", "Gallery")', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) window.location.reload();
+                else alert('Error: ' + data.message);
+            })
+            .catch(() => alert('Error moving images.'));
+        }
+
+        // Confirm bulk delete
+        function confirmBulkDelete() {
+            const selectedIds = getSelectedImageIds();
+            if (selectedIds.length === 0) {
+                alert('Please select at least one image.');
+                return;
+            }
+
+            showConfirmModal(
+                `Are you sure you want to delete <strong>${selectedIds.length}</strong> selected image(s)?<br><br>This action cannot be undone.`,
+                function() { bulkDeleteImages(); },
+                { title: 'Delete Selected Images', confirmText: 'Delete All', confirmClass: 'btn-danger' }
+            );
+        }
+
+        // Execute bulk delete
+        function bulkDeleteImages() {
+            const selectedIds = getSelectedImageIds();
+
+            if (selectedIds.length === 0) {
+                alert('No images selected.');
+                return;
+            }
+
+            const formData = new FormData();
+            selectedIds.forEach(id => formData.append('imageIds', id));
+            formData.append('__RequestVerificationToken', csrfToken);
+
+            fetch('@Url.Action("DeleteImages", "Gallery")', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) window.location.reload();
+                else alert('Error: ' + data.message);
+            })
+            .catch(() => alert('Error deleting images.'));
         }
 
         // ============================================================
@@ -1137,10 +1440,49 @@
     <style>
         .gallery-card {
             transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            position: relative;
         }
         .gallery-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 6px 12px rgba(0,0,0,0.15) !important;
+        }
+        /* Image checkbox overlay */
+        .image-checkbox-overlay {
+            position: absolute;
+            top: 8px;
+            left: 20px;
+            z-index: 10;
+        }
+        .image-checkbox {
+            width: 1.4em;
+            height: 1.4em;
+            cursor: pointer;
+            border: 2px solid #fff;
+            background-color: rgba(255,255,255,0.8);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        .image-checkbox:checked {
+            background-color: #0b5ed7 !important;
+            border-color: #0b5ed7 !important;
+        }
+        .image-checkbox:focus {
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+        /* Highlight selected card */
+        .gallery-card:has(.image-checkbox:checked) {
+            outline: 3px solid #0b5ed7;
+            outline-offset: -3px;
+        }
+        /* Select all checkbox styling */
+        #selectAllImages {
+            width: 1.2em;
+            height: 1.2em;
+            cursor: pointer;
+            border: 2px solid #6c757d;
+        }
+        #selectAllImages:checked {
+            background-color: #0b5ed7 !important;
+            border-color: #0b5ed7 !important;
         }
         .gallery-image-container {
             height: 300px;

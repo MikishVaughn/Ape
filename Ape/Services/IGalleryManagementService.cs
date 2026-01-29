@@ -35,6 +35,7 @@ namespace Ape.Services
         Task<GalleryImageOperationResult> MoveImageAsync(int imageId, int targetCategoryId);
         Task<GalleryImageOperationResult> MoveImagesAsync(int[] imageIds, int targetCategoryId);
         Task<GalleryImageOperationResult> DeleteImageAsync(int imageId);
+        Task<GalleryImageOperationResult> DeleteImagesAsync(int[] imageIds);
         Task<GalleryImageOperationResult> UpdateImageSortOrdersAsync(int[] imageIds, int[] sortOrders);
 
         // ============================================================
