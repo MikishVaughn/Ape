@@ -204,10 +204,11 @@ Ape/
 
 ## Next Steps
 
-- **Email Configuration Guide** - Set up Azure and SMTP email
 - **Administrator Guide** - Learn all admin features
-- **User Management Guide** - Managing users and roles
-- **Document & Gallery Guide** - Managing content
+- **Email Configuration Guide** - Set up Azure and SMTP email
+- **Document Library Guide** - Managing PDF documents
+- **Photo Gallery Guide** - Managing image galleries
+- **Security Guide** - Security features and best practices
 
 ---
 
