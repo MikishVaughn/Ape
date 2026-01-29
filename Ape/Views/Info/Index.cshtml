@@ -15,12 +15,46 @@
             max-height: 120px;  /* Phone screens */
         }
     }
+
+    /* Pulsating button style */
+    .btn-pulse {
+        display: inline-block;
+        background: rgba(0, 0, 0, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white !important;
+        padding: 0.5rem 1.25rem;
+        border-radius: 20px;
+        font-weight: 600;
+        text-decoration: none !important;
+        transition: all 0.3s ease;
+        animation: pulse 2s infinite;
+    }
+
+    .btn-pulse:hover {
+        background: rgba(0, 0, 0, 0.85);
+        transform: translateY(-2px);
+        color: white !important;
+        animation: none;
+    }
+
+    @@keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
 </style>
 
 <!-- Hero Section -->
 <div class="container mt-4 mb-5">
 
     <h1 class="text-center display-5 fw-bold mb-2">Welcome to the<br />Ape framework</h1>
+
+    <div class="text-center mb-4">
+        <a href="https://github.com/MikishVaughn/Ape" target="_blank" rel="noopener noreferrer"
+           class="btn-pulse">
+            <i class="bi bi-github me-2"></i>View on GitHub
+        </a>
+    </div>
 
     <div class="row align-items-center">
 
@@ -31,8 +65,9 @@
         <div class="col-12 col-md-8" style="max-width: 620px;">
             <img class="w-100" src="~/images/site/mvc.png" />
             <p class="lead text-secondary mb-2">
-                An <b>ASP.NET Core MVC</b> membership platform with role-based access,
-                secure document management, and admin-configurable settings.
+                A production-ready ASP.NET Core MVC framework with comprehensive authentication, 
+                role-based access control, document management, and administrative tools. This framework 
+                provides a solid foundation for building secure, enterprise-grade web applications.
             </p>
             
             <div class="d-flex flex-wrap gap-2">

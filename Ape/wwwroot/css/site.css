@@ -826,4 +826,9 @@ textarea[aria-invalid="true"] {
     caret-color: transparent;
 }
 
+/* Restore cursor in editable fields */
+input, textarea, select, [contenteditable="true"] {
+    caret-color: auto;
+}
+
 /* #endregion Hide Flashing Cursor */
