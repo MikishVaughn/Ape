@@ -5,38 +5,19 @@
 }
 
 <style>
+
     .logo {
         image-rendering: pixelated;
-        max-height: 128px; /* Large screens */
+        max-height: 200px; /* Large screens */
     }
 
-    @@media (max-width: 768px) {
-        .logo {
-            display: none;
-            max-height: 72px; /* Phone screens */
-        }
-    }
-
-    .tree {
+   .tree {
         image-rendering: pixelated;
-        max-height: 200px;  /* Large screens */
-    }
-
-    @@media (max-width: 768px) {
-        .tree {
-            max-height: 120px;  /* Phone screens */
-        }
-    }
+        max-height: 136px;  /* Large screens */
+    }   
 
     .treephone {
         display: none;
-    }
-
-    @@media (max-width: 768px) {
-        .treephone {
-            display: inline;
-            max-height: 116px; /* Phone screens */
-        }
     }
 
     .vsicon {
@@ -45,9 +26,26 @@
     }
 
     @@media (max-width: 768px) {
-        .vsicon {            
+
+        .logo,
+        .tree {
+            display: none;
+        }
+
+        .treephone {
+            display: inline;
+            max-height: 136px; /* Phone screens */
+        }
+
+        .logophone {
+            display: inline;
+            max-height: 80px; /* Phone screens */
+        }
+
+        .vsicon {
             max-height: 18px; /* Phone screens */
         }
+
     }
 
     /* Pulsating button style */
@@ -91,6 +89,7 @@
 
 <!-- Hero Section -->
 <div class="container mt-0 mb-4">
+
     <div class="container row justify-content-around">
 
         <!-- Welcome -->
@@ -98,14 +97,14 @@
             <h1 class="display-5 fw-bold mb-0">Welcome to the<br />Ape framework</h1>            
         </div>
 
-        <!-- Logo Image -->
+        <!-- Apetree Image -->
         <div class="col-12 col-md-4 text-start">
-            <img class="img-fluid logo" src="~/images/site/logo.png" alt="Ape Framework logo" />
+            <img class="img-fluid tree" src="~/images/site/apetree.png" alt="Apetree logo" />
         </div>
 
     </div>
     
-
+    <!-- Visual Studio Label -->
     <div class="text-center mb-2">
 
         <!-- for -->
@@ -121,6 +120,7 @@
         </a>
 
     </div>
+
 </div>
 
 <!-- First Card -->
@@ -129,15 +129,14 @@
             
             <div class="row g-4">
     
-                <div class="card shadow-sm w-100 col-12 col-sm-6 col-lg-4 p-4" style="background-color: lightgray;">
+                <div class="card shadow-sm w-100 col-12 col-sm-6 col-lg-4 py-4 px-1" style="background-color: lightgray;">
 
                     <div class="container row">
 
                         <div class="col-12 col-md-4 text-lg-end text-center mb-2 mb-md-0">
-
-                            <img class="img-fluid treephone" src="~/images/site/logo.png" alt="" aria-hidden="true" />
-
-                            <img src="~/images/site/Bananna.png" alt="Ape mascot" class="img-fluid tree" />
+                           
+                            <img class="img-fluid treephone" src="~/images/site/tree.png" alt="tree" aria-hidden="true" />  
+                            <img class="img-fluid logo" src="~/images/site/logo.png" alt="Ape mascot" />
 
                         </div>
 
