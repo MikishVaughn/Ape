@@ -8,7 +8,7 @@
 
     .logo {
         image-rendering: pixelated;
-        max-height: 64px; /* Large screens */
+        max-height: 70px; /* Large screens */
     }
 
    .tree {
@@ -99,17 +99,11 @@
 <!-- Hero Section -->
 <div class="container mt-0 mb-4">
 
-    <div class="row justify-content-around">
-
-        <!-- Ape Image -->
-        <div class="col-12 col-md-4 pe-0 text-center text-md-end">
-            <img class="img-fluid logo" src="~/images/site/logo.png" alt="logo" />
-        </div>
+    <div class="row justify-content-around">       
 
         <!-- The Ape Project -->
-        <div class="col-12 col-md-8 text-center text-md-start ">
-            <h1 class="display-5 fw-bold mb-0">@siteName</h1>
-                       
+        <div class="col-12 col-md-8 text-center">
+            <h1 class="display-5 fw-bold mb-0"><img class="img-fluid logo me-2" src="/images/site/logo.png" alt="logo">@siteName</h1>                       
         </div>        
 
     </div>
@@ -121,7 +115,7 @@
         <h5 class="mb-0">for</h5>
 
         <!-- Visual Studio -->
-        <h2><img class="text-center vsicon" src="~/images/site/vsicon.webp" alt="" aria-hidden="true" /> Visual Studio</h2>
+        <h2><img class="text-center vsicon" src="~/images/site/vsicon.webp" alt="" aria-hidden="true" /> <a class="text-dark text-decoration-none" href="https://visualstudio.microsoft.com/" target="_blank" rel="noopener noreferrer">Visual Studio</a></h2>
 
         <!-- About Button -->
         <a asp-controller="Info" asp-action="About" class="btn-pulse my-2 me-2">
