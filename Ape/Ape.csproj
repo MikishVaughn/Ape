@@ -54,6 +54,8 @@
     <Content Remove="Areas\Identity\Pages\Account\Manage\TwoFactorAuthenticationx.cshtml" />
     <Content Remove="Areas\Identity\Pages\Account\RegisterConfirmationx.cshtml" />
     <Content Remove="Areas\Identity\Pages\Account\Registerx.cshtml" />
+    <Content Remove="wwwroot\Images\Site\ApeTree.jpg" />
+    <Content Remove="wwwroot\Images\Site\Tree1.png" />
   </ItemGroup>
 
   <ItemGroup>
