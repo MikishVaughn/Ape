@@ -31,6 +31,8 @@
                                     id = Model.Input.Id,
                                     returnUrl = Model.ReturnUrl
                                 });
+                            // Managers cannot modify Admin users
+                            var canModifyUser = Model.IsCurrentUserAdmin || !Model.IsEditedUserAdmin;
                         }
 
                         <!-- Roles -->
@@ -43,27 +45,33 @@
 
                         @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
                         {
-                            @if (Model.Input.IsActive)
+                            if (Model.Input.IsActive)
                             {
-                                <!-- Delete Button -->
-                                <button type="button" class="btn btn-sm btn-danger rounded-2 shadow w-100 w-md-auto" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">
-                                    Delete
-                                </button>
+                                if (canModifyUser)
+                                {
+                                    <!-- Delete Button -->
+                                    <button type="button" class="btn btn-sm btn-danger rounded-2 shadow w-100 w-md-auto" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">
+                                        Delete
+                                    </button>
 
-                                <!-- Deactivate Button -->
-                                <button type="button" class="btn btn-sm btn-warning rounded-2 shadow w-100 w-md-auto" data-bs-toggle="modal" data-bs-target="#deactivateConfirmModal">
-                                    Deactivate
-                                </button>
+                                    <!-- Deactivate Button -->
+                                    <button type="button" class="btn btn-sm btn-warning rounded-2 shadow w-100 w-md-auto" data-bs-toggle="modal" data-bs-target="#deactivateConfirmModal">
+                                        Deactivate
+                                    </button>
+                                }
                             }
                             else
                             {
-                                <!-- Reactivate -->
-                                <button type="button" class="btn btn-sm btn-success rounded-2 shadow w-100 w-md-auto" onclick="confirmReactivate()">
-                                    Reactivate
-                                </button>
+                                if (canModifyUser)
+                                {
+                                    <!-- Reactivate -->
+                                    <button type="button" class="btn btn-sm btn-success rounded-2 shadow w-100 w-md-auto" onclick="confirmReactivate()">
+                                        Reactivate
+                                    </button>
+                                }
                             }
 
-                            @if (Model.Input.IsLockedOut)
+                            if (Model.Input.IsLockedOut && canModifyUser)
                             {
                                 <button type="button" class="btn btn-sm btn-info rounded-2 shadow w-100 w-md-auto" onclick="confirmUnlock()">
                                     Unlock Account
@@ -72,9 +80,16 @@
                         }
 
                         <!-- Save -->
-                        <button type="submit" class="btn btn-sm btn-success rounded-2 shadow w-100 w-md-auto">
-                            Save
-                        </button>
+                        @if (canModifyUser)
+                        {
+                            <button type="submit" class="btn btn-sm btn-success rounded-2 shadow w-100 w-md-auto">
+                                Save
+                            </button>
+                        }
+                        else
+                        {
+                            <span class="text-muted small align-self-center">View only - Admins cannot be edited by Managers</span>
+                        }
 
                     </div>
 

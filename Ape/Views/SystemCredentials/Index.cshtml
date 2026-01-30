@@ -3,6 +3,8 @@
     ViewData["Title"] = "System Credentials Management";
 }
 
+@Html.AntiForgeryToken()
+
 <div class="container-fluid py-4">
     <div class="row mb-4">
         <div class="col-12">
@@ -236,13 +238,22 @@
             // View credential value
             $('.btn-view-value').click(function () {
                 var credentialId = $(this).data('credential-id');
+                var token = $('input[name="__RequestVerificationToken"]').val();
 
-                $.get('@Url.Action("GetDecryptedValue")', { id: credentialId }, function (result) {
-                    if (result.success) {
-                        $('#decryptedValueText').val(result.value);
-                        $('#viewCredentialModal').modal('show');
-                    } else {
-                        alert('Error retrieving credential: ' + result.error);
+                $.ajax({
+                    url: '@Url.Action("GetDecryptedValue")',
+                    type: 'POST',
+                    data: { id: credentialId, __RequestVerificationToken: token },
+                    success: function (result) {
+                        if (result.success) {
+                            $('#decryptedValueText').val(result.value);
+                            $('#viewCredentialModal').modal('show');
+                        } else {
+                            alert('Error retrieving credential: ' + result.error);
+                        }
+                    },
+                    error: function () {
+                        alert('Error retrieving credential. Please try again.');
                     }
                 });
             });

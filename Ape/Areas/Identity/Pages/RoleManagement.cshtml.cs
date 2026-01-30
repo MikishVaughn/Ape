@@ -12,7 +12,11 @@ namespace Ape.Areas.Identity.Pages
         private readonly RoleManager<IdentityRole> _roleManager = roleManager;
         private readonly UserManager<IdentityUser> _userManager = userManager;
 
+        // System roles that cannot be renamed or deleted
+        private static readonly string[] ProtectedRoles = ["Admin", "Manager", "Member"];
+
         public List<RoleInfo> Roles { get; set; } = [];
+        public bool IsCurrentUserAdmin { get; set; }
 
         [TempData]
         public string? StatusMessage { get; set; }
@@ -26,11 +30,19 @@ namespace Ape.Areas.Identity.Pages
 
         public async Task OnGetAsync()
         {
+            IsCurrentUserAdmin = User.IsInRole("Admin");
             await LoadRolesAsync();
         }
 
         public async Task<IActionResult> OnPostCreateAsync(string roleName)
         {
+            // Only Admins can create roles
+            if (!User.IsInRole("Admin"))
+            {
+                StatusMessage = "Error: Only Admins can create roles.";
+                return RedirectToPage();
+            }
+
             if (string.IsNullOrWhiteSpace(roleName))
             {
                 StatusMessage = "Error: Role name cannot be empty.";
@@ -78,6 +90,20 @@ namespace Ape.Areas.Identity.Pages
 
             var oldName = role.Name;
 
+            // Protect system roles from being renamed
+            if (ProtectedRoles.Contains(oldName, StringComparer.OrdinalIgnoreCase))
+            {
+                StatusMessage = $"Error: The \"{oldName}\" role is a protected system role and cannot be renamed.";
+                return RedirectToPage();
+            }
+
+            // Only Admins can rename roles
+            if (!User.IsInRole("Admin"))
+            {
+                StatusMessage = "Error: Only Admins can rename roles.";
+                return RedirectToPage();
+            }
+
             // Check if the new name already exists (different role)
             var existingRole = await _roleManager.FindByNameAsync(newName);
             if (existingRole != null && existingRole.Id != roleId)
@@ -110,6 +136,20 @@ namespace Ape.Areas.Identity.Pages
             }
 
             var roleName = role.Name ?? "Unknown";
+
+            // Protect system roles from being deleted
+            if (ProtectedRoles.Contains(roleName, StringComparer.OrdinalIgnoreCase))
+            {
+                StatusMessage = $"Error: The \"{roleName}\" role is a protected system role and cannot be deleted.";
+                return RedirectToPage();
+            }
+
+            // Only Admins can delete roles
+            if (!User.IsInRole("Admin"))
+            {
+                StatusMessage = "Error: Only Admins can delete roles.";
+                return RedirectToPage();
+            }
 
             // Check if any users are assigned to this role
             var usersInRole = await _userManager.GetUsersInRoleAsync(roleName);

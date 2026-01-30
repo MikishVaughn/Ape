@@ -28,6 +28,9 @@ namespace Ape.Areas.Identity.Pages
         [BindProperty]
         public List<RoleViewModel> AllRoles { get; set; } = [];
 
+        public bool IsCurrentUserAdmin { get; set; }
+        public bool IsEditedUserAdmin { get; set; }
+
         public class RoleViewModel
         {
             public required string Value { get; set; }
@@ -181,6 +184,8 @@ namespace Ape.Areas.Identity.Pages
             }
 
             await LoadUserAsync(user);
+            IsCurrentUserAdmin = User.IsInRole("Admin");
+            IsEditedUserAdmin = await _userManager.IsInRoleAsync(user, "Admin");
             return Page();
         }
 
@@ -202,6 +207,13 @@ namespace Ape.Areas.Identity.Pages
             if (user == null)
             {
                 StatusMessage = $"Error: Unable to find user with ID '{Input.Id}' to update.";
+                return GetReturnRedirect();
+            }
+
+            // Managers cannot modify Admin user profiles
+            if (!User.IsInRole("Admin") && await _userManager.IsInRoleAsync(user, "Admin"))
+            {
+                StatusMessage = "Error: Only Admins can modify Admin user profiles.";
                 return GetReturnRedirect();
             }
 
@@ -275,6 +287,13 @@ namespace Ape.Areas.Identity.Pages
                 return GetReturnRedirect();
             }
 
+            // Managers cannot unlock Admin users
+            if (!User.IsInRole("Admin") && await _userManager.IsInRoleAsync(userToUnlock, "Admin"))
+            {
+                StatusMessage = "Error: Only Admins can unlock Admin users.";
+                return GetReturnRedirect();
+            }
+
             userToUnlock.LockoutEnd = null;
             userToUnlock.AccessFailedCount = 0;
             var result = await _userManager.UpdateAsync(userToUnlock);
@@ -302,6 +321,13 @@ namespace Ape.Areas.Identity.Pages
             if (currentUser != null && userToDelete.Id == currentUser.Id)
             {
                 StatusMessage = "Error: You cannot delete your own account.";
+                return GetReturnRedirect();
+            }
+
+            // Managers cannot delete Admin users
+            if (!User.IsInRole("Admin") && await _userManager.IsInRoleAsync(userToDelete, "Admin"))
+            {
+                StatusMessage = "Error: Only Admins can delete Admin users.";
                 return GetReturnRedirect();
             }
 
@@ -391,6 +417,13 @@ namespace Ape.Areas.Identity.Pages
                 return Page();
             }
 
+            // Managers cannot deactivate Admin users
+            if (!User.IsInRole("Admin") && await _userManager.IsInRoleAsync(userToDeactivate, "Admin"))
+            {
+                StatusMessage = "Error: Only Admins can deactivate Admin users.";
+                return GetReturnRedirect();
+            }
+
             userToDeactivate.LockoutEnd = DateTimeOffset.MaxValue;
             var identityResult = await _userManager.UpdateAsync(userToDeactivate);
 
@@ -433,6 +466,13 @@ namespace Ape.Areas.Identity.Pages
             if (userToReactivate == null)
             {
                 StatusMessage = "Member not found.";
+                return GetReturnRedirect();
+            }
+
+            // Managers cannot reactivate Admin users
+            if (!User.IsInRole("Admin") && await _userManager.IsInRoleAsync(userToReactivate, "Admin"))
+            {
+                StatusMessage = "Error: Only Admins can reactivate Admin users.";
                 return GetReturnRedirect();
             }
 

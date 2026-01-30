@@ -27,14 +27,21 @@
 
                     <div class="card-body">
 
-                        <!-- Add Role -->
-                        <form method="post" asp-page-handler="Create" class="mb-4">
-                            @Html.AntiForgeryToken()
-                            <div class="input-group">
-                                <input type="text" name="roleName" class="form-control" placeholder="New role name" required />
-                                <button type="submit" class="btn btn-success">Add Role</button>
-                            </div>
-                        </form>
+                        <!-- Add Role (Admin only) -->
+                        @if (Model.IsCurrentUserAdmin)
+                        {
+                            <form method="post" asp-page-handler="Create" class="mb-4">
+                                @Html.AntiForgeryToken()
+                                <div class="input-group">
+                                    <input type="text" name="roleName" class="form-control" placeholder="New role name" required />
+                                    <button type="submit" class="btn btn-success">Add Role</button>
+                                </div>
+                            </form>
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-4">Only Admins can create, rename, or delete roles.</p>
+                        }
 
                         <hr />
 
@@ -50,43 +57,60 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    @{
+                                        var protectedRoles = new[] { "Admin", "Manager", "Member" };
+                                    }
                                     @foreach (var role in Model.Roles)
                                     {
+                                        var isProtected = protectedRoles.Contains(role.Name, StringComparer.OrdinalIgnoreCase);
                                         <tr>
-                                            <td>@role.Name</td>
+                                            <td>
+                                                @role.Name
+                                                @if (isProtected)
+                                                {
+                                                    <span class="badge bg-info ms-1" title="System role - cannot be renamed or deleted">System</span>
+                                                }
+                                            </td>
                                             <td class="text-center">
                                                 <span class="badge @(role.UserCount > 0 ? "bg-primary" : "bg-secondary")">
                                                     @role.UserCount
                                                 </span>
                                             </td>
                                             <td class="text-end">
-                                                <button type="button"
-                                                        class="btn btn-sm btn-outline-primary"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#renameModal"
-                                                        data-role-id="@role.Id"
-                                                        data-role-name="@role.Name">
-                                                    Rename
-                                                </button>
-                                                @if (role.UserCount == 0)
+                                                @if (Model.IsCurrentUserAdmin && !isProtected)
                                                 {
                                                     <button type="button"
-                                                            class="btn btn-sm btn-outline-danger"
+                                                            class="btn btn-sm btn-outline-primary"
                                                             data-bs-toggle="modal"
-                                                            data-bs-target="#deleteModal"
+                                                            data-bs-target="#renameModal"
                                                             data-role-id="@role.Id"
                                                             data-role-name="@role.Name">
-                                                        Delete
+                                                        Rename
                                                     </button>
+                                                    @if (role.UserCount == 0)
+                                                    {
+                                                        <button type="button"
+                                                                class="btn btn-sm btn-outline-danger"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#deleteModal"
+                                                                data-role-id="@role.Id"
+                                                                data-role-name="@role.Name">
+                                                            Delete
+                                                        </button>
+                                                    }
+                                                    else
+                                                    {
+                                                        <button type="button"
+                                                                class="btn btn-sm btn-outline-secondary"
+                                                                disabled
+                                                                title="Remove all users from this role before deleting">
+                                                            Delete
+                                                        </button>
+                                                    }
                                                 }
-                                                else
+                                                else if (!Model.IsCurrentUserAdmin)
                                                 {
-                                                    <button type="button"
-                                                            class="btn btn-sm btn-outline-secondary"
-                                                            disabled
-                                                            title="Remove all users from this role before deleting">
-                                                        Delete
-                                                    </button>
+                                                    <span class="text-muted small">Admin only</span>
                                                 }
                                             </td>
                                         </tr>

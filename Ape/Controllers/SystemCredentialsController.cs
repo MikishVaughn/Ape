@@ -275,7 +275,8 @@ public class SystemCredentialsController(
     /// <summary>
     /// Get decrypted credential value (AJAX).
     /// </summary>
-    [HttpGet]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> GetDecryptedValue(int id)
     {
         try
