@@ -26,6 +26,8 @@ namespace Ape.Areas.Identity.Pages
         [TempData]
         public string? StatusMessage { get; set; }
 
+        public bool IsCurrentUserAdmin { get; set; }
+
         public class RoleViewModel
         {
             public required string Value { get; set; }
@@ -47,6 +49,7 @@ namespace Ape.Areas.Identity.Pages
 
             UserId = userId;
             ReturnUrl = returnUrl;
+            IsCurrentUserAdmin = User.IsInRole("Admin");
 
             UserToEdit = await _userManager.FindByIdAsync(UserId);
             if (UserToEdit == null)
@@ -108,6 +111,24 @@ namespace Ape.Areas.Identity.Pages
 
             var originalRoles = await _userManager.GetRolesAsync(UserToEdit);
             var selectedRoles = AllRoles.Where(r => r.Selected).Select(r => r.Value ?? string.Empty).ToList();
+
+            // Managers cannot modify Admin role - preserve original Admin state
+            if (!User.IsInRole("Admin"))
+            {
+                bool hadAdmin = originalRoles.Contains("Admin");
+                bool hasAdmin = selectedRoles.Contains("Admin");
+
+                if (hadAdmin && !hasAdmin)
+                {
+                    // Trying to remove Admin - restore it
+                    selectedRoles.Add("Admin");
+                }
+                else if (!hadAdmin && hasAdmin)
+                {
+                    // Trying to add Admin - remove it
+                    selectedRoles.Remove("Admin");
+                }
+            }
 
             var rolesToRemove = originalRoles.Except(selectedRoles).ToList();
             var rolesToAdd = selectedRoles.Except(originalRoles).ToList();

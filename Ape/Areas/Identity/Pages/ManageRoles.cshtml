@@ -43,11 +43,22 @@
                                             {
                                                 <div class="form-check">
                                                     <input type="hidden" asp-for="AllRoles[i].Value" />
+                                                    @{
+                                                        bool isAdminRole = Model.AllRoles[i].Value == "Admin";
+                                                        bool disableCheckbox = isAdminRole && !Model.IsCurrentUserAdmin;
+                                                    }
                                                     <input type="checkbox" asp-for="AllRoles[i].Selected"
                                                            class="form-check-input custom-checkbox-green"
                                                            id="role-@i"
-                                                           data-role-name="@Model.AllRoles[i].Text" />
-                                                    <label class="form-check-label" for="role-@i">@Model.AllRoles[i].Text</label>
+                                                           data-role-name="@Model.AllRoles[i].Text"
+                                                           disabled="@disableCheckbox" />
+                                                    <label class="form-check-label" for="role-@i">
+                                                        @Model.AllRoles[i].Text
+                                                        @if (disableCheckbox)
+                                                        {
+                                                            <span class="text-muted small">(Admin only)</span>
+                                                        }
+                                                    </label>
                                                 </div>
                                             }
                                         }
