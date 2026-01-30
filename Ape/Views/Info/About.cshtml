@@ -98,7 +98,7 @@
                 <i class="bi bi-lightbulb text-warning"></i> What is the Ape Project?
             </h2>
             <p>
-                The <strong>Ape Project</strong> is a comprehensive Visual Studio 2022 solution that serves as an
+                The <strong>Ape Project</strong> is a comprehensive Visual Studio 2026 solution that serves as an
                 implementation guide and starter template for building modern web applications using
                 <strong>ASP.NET Core MVC</strong>, <strong>Entity Framework Core</strong>, and <strong>ASP.NET Identity</strong>.
             </p>
@@ -118,14 +118,27 @@
             </h2>
             <p>To get started with the Ape Project, you'll need:</p>
             <div class="d-flex flex-wrap gap-2 mb-3">
-                <span class="requirement-badge"><i class="bi bi-pc-display me-2"></i>Visual Studio 2022</span>
-                <span class="requirement-badge"><i class="bi bi-gear me-2"></i>.NET 8.0+ SDK</span>
+                <span class="requirement-badge"><i class="bi bi-pc-display me-2"></i>Visual Studio 2026</span>
+                <span class="requirement-badge"><i class="bi bi-gear me-2"></i>.NET 10 LTS</span>
                 <span class="requirement-badge"><i class="bi bi-database me-2"></i>SQL Server (LocalDB or Full)</span>
                 <span class="requirement-badge"><i class="bi bi-git me-2"></i>Git (optional)</span>
             </div>
+
+            <h6 class="mt-4 mb-2"><i class="bi bi-gear-fill me-1"></i> Visual Studio Workloads</h6>
+            <p class="mb-2">During Visual Studio installation, select the following workloads:</p>
+            <ul class="mb-3">
+                <li>
+                    <strong>ASP.NET and web development</strong>
+                    <span class="text-muted">— Required for ASP.NET Core MVC, Razor, and web tooling</span>
+                </li>
+                <li>
+                    <strong>Data storage and processing</strong>
+                    <span class="text-muted">— Recommended for SQL Server tools and database management</span>
+                </li>
+            </ul>
             <p class="text-muted mb-0">
                 <i class="bi bi-info-circle me-1"></i>
-                SQL Server LocalDB is included with Visual Studio and works great for development.
+                SQL Server LocalDB is included with the ASP.NET workload and works great for development.
                 For production, we recommend SQL Server Express or higher.
             </p>
         </div>
@@ -152,7 +165,7 @@
                         <span class="step-number me-3">2</span>
                         <div>
                             <strong>Open in Visual Studio</strong>
-                            <p class="text-muted mb-0">Open the <code>Ape.sln</code> solution file</p>
+                            <p class="text-muted mb-0">Open the <code>Ape.slnx</code> solution file</p>
                         </div>
                     </div>
                 </div>

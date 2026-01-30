@@ -1,7 +1,7 @@
 @inject Ape.Services.SecureConfigurationService ConfigService
 @{
     ViewData["Title"] = "Welcome";
-    string siteName = await ConfigService.GetCredentialAsync("SITE_NAME") ?? "Ape";
+    string siteName = await ConfigService.GetCredentialAsync("SITE_NAME") ?? "The Ape Project";
 }
 
 <style>
@@ -108,7 +108,7 @@
 
         <!-- The Ape Project -->
         <div class="col-12 col-md-8 text-center text-md-start ">
-            <h1 class="display-5 fw-bold mb-0">The Ape Project</h1>
+            <h1 class="display-5 fw-bold mb-0">@siteName</h1>
                        
         </div>        
 
