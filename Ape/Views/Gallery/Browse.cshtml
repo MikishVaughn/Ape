@@ -136,16 +136,16 @@
                                         <div class="card-footer bg-transparent border-0 py-1">
                                             <div class="btn-group btn-group-sm w-100" role="group">
                                                 <button type="button" class="btn btn-outline-secondary"
-                                                        onclick="showEditCategoryModal(@category.CategoryId, '@category.Name.Replace("'", "\\'")', @((int)category.AccessLevel), '@(category.Description?.Replace("'", "\\'") ?? "")');">
-                                                    Edit
+                                                        onclick="showEditCategoryModal(@category.CategoryId, '@category.Name.Replace("'", "\\'")', @((int)category.AccessLevel), '@(category.Description?.Replace("'", "\\'") ?? "")');" title="Edit">
+                                                    <i class="bi bi-pencil"></i> Edit
                                                 </button>
                                                 <button type="button" class="btn btn-outline-secondary"
-                                                        onclick="showMoveCategoryModal(@category.CategoryId, '@category.Name.Replace("'", "\\'")', @(category.ParentCategoryId?.ToString() ?? "null"));">
-                                                    Move
+                                                        onclick="showMoveCategoryModal(@category.CategoryId, '@category.Name.Replace("'", "\\'")', @(category.ParentCategoryId?.ToString() ?? "null"));" title="Move">
+                                                    <i class="bi bi-folder-symlink"></i> Move
                                                 </button>
                                                 <button type="button" class="btn btn-outline-danger"
-                                                        onclick="confirmDeleteCategory(@category.CategoryId, '@category.Name.Replace("'", "\\'")');">
-                                                    Delete
+                                                        onclick="confirmDeleteCategory(@category.CategoryId, '@category.Name.Replace("'", "\\'")');" title="Delete">
+                                                    <i class="bi bi-trash"></i> Delete
                                                 </button>
                                             </div>
                                         </div>

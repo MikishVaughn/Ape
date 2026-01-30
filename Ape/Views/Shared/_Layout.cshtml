@@ -1,9 +1,57 @@
-﻿<!DOCTYPE html>
+﻿@inject Ape.Services.SecureConfigurationService ConfigService
+@{
+    var siteName = await ConfigService.GetCredentialAsync("SITE_NAME") ?? "Ape";
+    var siteDescription = await ConfigService.GetCredentialAsync("SITE_DESCRIPTION") ?? "A production-ready ASP.NET Core MVC framework";
+    var siteUrl = await ConfigService.GetCredentialAsync("SITE_URL") ?? "";
+
+    var pageTitle = ViewData["Title"]?.ToString() ?? "Home";
+    var fullTitle = $"{pageTitle} - {siteName}";
+    var ogDescription = ViewData["OgDescription"]?.ToString() ?? siteDescription;
+    var ogImage = ViewData["OgImage"]?.ToString() ?? $"{siteUrl}/Images/Site/ApeTree.png";
+    var ogType = ViewData["OgType"]?.ToString() ?? "website";
+
+    // Build current page URL from request if not explicitly set
+    var currentUrl = ViewData["OgUrl"]?.ToString();
+    if (string.IsNullOrEmpty(currentUrl) && !string.IsNullOrEmpty(siteUrl))
+    {
+        var request = Context.Request;
+        currentUrl = $"{siteUrl}{request.Path}{request.QueryString}";
+    }
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Ape</title>
+    <title>@fullTitle</title>
+
+    <!-- Primary Meta Tags -->
+    <meta name="title" content="@fullTitle" />
+    <meta name="description" content="@ogDescription" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="@ogType" />
+    <meta property="og:site_name" content="@siteName" />
+    <meta property="og:title" content="@fullTitle" />
+    <meta property="og:description" content="@ogDescription" />
+    @if (!string.IsNullOrEmpty(ogImage))
+    {
+        <meta property="og:image" content="@ogImage" />
+    }
+    @if (!string.IsNullOrEmpty(currentUrl))
+    {
+        <meta property="og:url" content="@currentUrl" />
+    }
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="@fullTitle" />
+    <meta name="twitter:description" content="@ogDescription" />
+    @if (!string.IsNullOrEmpty(ogImage))
+    {
+        <meta name="twitter:image" content="@ogImage" />
+    }
+
     <script type="importmap"></script>
     <link rel="apple-touch-icon" sizes="180x180" href="~/lib/Icons/apple-touch-icon.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="~/lib/Icons/favicon-32x32.png" />

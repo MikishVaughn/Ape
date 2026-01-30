@@ -62,6 +62,55 @@ The System Credentials page allows you to securely store and manage sensitive co
    - When it occurred
    - IP address and user agent
 
+### Common System Credentials
+
+The following credentials are used by the framework:
+
+| Key | Category | Purpose |
+|-----|----------|---------|
+| `SITE_NAME` | Config | Site name displayed in headers and titles |
+| `SITE_URL` | Config | Full site URL (e.g., `https://illustrate.net`) - used for social sharing links |
+| `SITE_DESCRIPTION` | Config | Default site description for social media sharing |
+| `ACS_CONNECTION` | Email | Azure Communication Services connection string |
+| `ACS_SENDER` | Email | Azure sender email address |
+| `SMTP_HOST` | Email | SMTP server hostname |
+| `SMTP_PORT` | Email | SMTP server port |
+| `SMTP_USER` | Email | SMTP username |
+| `SMTP_PASSWORD` | Email | SMTP password |
+| `SMTP_SENDER` | Email | SMTP sender email address |
+| `CONTACT_FORM_RECIPIENTS` | Email | Comma-separated contact form recipient emails |
+
+### Social Media Sharing Setup
+
+To enable proper link previews when your site is shared on social media (Facebook, Twitter/X, LinkedIn, etc.), configure these credentials:
+
+1. **SITE_URL** (Required)
+   - Set to your full site URL including `https://`
+   - Example: `https://illustrate.net`
+   - Used to build canonical URLs and image paths for sharing
+
+2. **SITE_DESCRIPTION** (Optional)
+   - Default description shown when pages are shared
+   - Keep it under 160 characters for best display
+   - Example: `A production-ready ASP.NET Core MVC framework`
+
+3. **Default Share Image**
+   - The default image used for sharing is `/Images/Site/ApeTree.png`
+   - Replace this image with your own branded image (recommended size: 1200x630 pixels)
+   - Individual pages can override this via `ViewData["OgImage"]`
+
+**Per-Page Overrides:**
+
+Individual views can customize their sharing metadata by setting these ViewData values:
+```csharp
+@{
+    ViewData["Title"] = "Page Title";
+    ViewData["OgDescription"] = "Custom description for this page";
+    ViewData["OgImage"] = "https://example.com/custom-image.jpg";
+    ViewData["OgType"] = "article"; // Default is "website"
+}
+```
+
 ---
 
 ## Email System Administration

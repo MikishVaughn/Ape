@@ -286,11 +286,14 @@ dotnet ef database update --connection "Server=...;Database=...;..."
 2. Log in with default admin (admin@admin.com / Admin123!)
 3. **Immediately change the password**
 4. Configure System Credentials:
+   - `SITE_NAME` - Your site display name
+   - `SITE_URL` - Full URL (e.g., `https://example.com`) for social sharing
+   - `SITE_DESCRIPTION` - Brief description for social media previews
    - SMTP settings
    - Azure Email settings (optional)
-   - Site name
-5. Configure Contact Form recipients
-6. Test email functionality
+5. Replace `/wwwroot/Images/Site/ApeTree.png` with your branded share image (1200x630px recommended)
+6. Configure Contact Form recipients
+7. Test email functionality
 
 ### Verify Functionality
 

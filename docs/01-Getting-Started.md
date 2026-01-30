@@ -172,7 +172,27 @@ See the **Email Configuration Guide** for detailed setup instructions.
 
 ---
 
-## Step 8: Verify Your Setup
+## Step 8: Configure Site Settings for Social Sharing
+
+To ensure your links display properly when shared on social media (Facebook, Twitter/X, LinkedIn, etc.), configure these settings:
+
+1. Log in as Admin
+2. Navigate to **System Credentials**
+3. Add these credentials:
+
+| Key | Category | Value |
+|-----|----------|-------|
+| `SITE_NAME` | Config | Your site name (e.g., "My Company") |
+| `SITE_URL` | Config | Your full site URL (e.g., `https://example.com`) |
+| `SITE_DESCRIPTION` | Config | A brief site description (under 160 characters) |
+
+4. Replace the default share image at `/wwwroot/Images/Site/ApeTree.png` with your own branded image (recommended: 1200x630 pixels)
+
+**Note:** The `SITE_URL` is required for proper social media link previews to work correctly.
+
+---
+
+## Step 9: Verify Your Setup
 
 After completing the steps above, verify everything works:
 
