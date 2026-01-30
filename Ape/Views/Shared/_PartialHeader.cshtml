@@ -102,31 +102,28 @@
                                     </ul>
                                 </li>
 
-                                <!-- Admin Tools Dropdown -->
-                                <li class="nav-item dropdown">
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <!-- Admin Tools Dropdown -->
+                                    <li class="nav-item dropdown">
 
-                                    <!-- Admin Tools Dropdown toggle -->
-                                    <a class="dropdown-item dropdown-toggle" href="#" id="adminToolsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
-                                        Admin Tools
-                                    </a>
+                                        <!-- Admin Tools Dropdown toggle -->
+                                        <a class="dropdown-item dropdown-toggle" href="#" id="adminToolsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
+                                            Admin Tools
+                                        </a>
 
-                                    <ul class="dropdown-menu ms-2 ps-2" style="width: 220px;" aria-labelledby="adminToolsDropdown" data-bs-auto-close="outside">
-
-                                        @if (User.IsInRole("Admin"))
-                                        {
+                                        <ul class="dropdown-menu ms-2 ps-2" style="width: 220px;" aria-labelledby="adminToolsDropdown" data-bs-auto-close="outside">
+                                      
                                             <!-- System Credentials (Admin Only) -->
-                                            <li><a class="dropdown-item" asp-controller="SystemCredentials" asp-action="Index">System Credentials</a></li>
-                                        }
+                                            <li><a class="dropdown-item" asp-controller="SystemCredentials" asp-action="Index">System Credentials</a></li>                                       
 
-                                        <!-- Manage Roles -->
-                                        <li><a class="dropdown-item" asp-area="Identity" asp-page="/RoleManagement">Manage Roles</a></li>
+                                            <!-- Manage Roles -->
+                                            <li><a class="dropdown-item" asp-area="Identity" asp-page="/RoleManagement">Manage Roles</a></li>
 
-                                        <!-- Manage Links -->
-                                        <li><a class="dropdown-item" asp-controller="Links" asp-action="ManageCategories">Manage Links</a></li>
+                                        </ul>
 
-                                    </ul>
-
-                                </li>
+                                    </li> 
+                                }
 
                             </ul>
                         </li>
