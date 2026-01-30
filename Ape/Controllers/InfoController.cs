@@ -39,6 +39,11 @@ namespace Ape.Controllers
             return View();
         }
 
+        public IActionResult About()
+        {
+            return View();
+        }
+
         [HttpPost]
         public async Task<IActionResult> SendEmail(string Name, string Email, string Subject, string Message,
             string Comment, string Website, string Company, string Url, string FormLoadTime, string JsToken)

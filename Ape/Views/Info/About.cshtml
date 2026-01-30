@@ -1,0 +1,308 @@
+@{
+    ViewData["Title"] = "About the Ape Project";
+}
+
+<style>
+    .section-card {
+        background-color: #f8f9fa;
+        border-left: 4px solid #0d6efd;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .section-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .step-number {
+        width: 32px;
+        height: 32px;
+        background-color: #0d6efd;
+        color: white;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+
+    .requirement-badge {
+        background-color: #e9ecef;
+        border: 1px solid #dee2e6;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        display: inline-block;
+        margin: 0.25rem;
+    }
+
+    .doc-link {
+        display: block;
+        padding: 0.75rem 1rem;
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        text-decoration: none;
+        color: #212529;
+        transition: all 0.2s ease;
+    }
+
+    .doc-link:hover {
+        background-color: #0d6efd;
+        color: white;
+        border-color: #0d6efd;
+        transform: translateX(4px);
+    }
+
+    .doc-link i {
+        transition: transform 0.2s ease;
+    }
+
+    .doc-link:hover i {
+        transform: translateX(4px);
+    }
+
+    .hosting-card {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        color: white;
+    }
+
+    .custom-dev-card {
+        background: linear-gradient(135deg, #2d3436 0%, #636e72 100%);
+        color: white;
+    }
+
+    .tech-stack-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+</style>
+
+<div class="container py-4" style="max-width: 900px;">
+
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold mb-3">
+            <i class="bi bi-info-circle text-primary"></i> About the Ape Project
+        </h1>
+        <p class="lead text-secondary">
+            A production-ready ASP.NET Core MVC framework designed to give developers a massive head start
+            on building secure, enterprise-grade web applications.
+        </p>
+    </div>
+
+    <!-- What is Ape? -->
+    <div class="card section-card shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h2 class="h4 mb-3">
+                <i class="bi bi-lightbulb text-warning"></i> What is the Ape Project?
+            </h2>
+            <p>
+                The <strong>Ape Project</strong> is a comprehensive Visual Studio 2022 solution that serves as an
+                implementation guide and starter template for building modern web applications using
+                <strong>ASP.NET Core MVC</strong>, <strong>Entity Framework Core</strong>, and <strong>ASP.NET Identity</strong>.
+            </p>
+            <p class="mb-0">
+                Rather than starting from scratch, Ape provides you with a fully-functional foundation that includes
+                user authentication, role-based access control, document management, image galleries, email services,
+                and administrative tools—all following best practices and security standards.
+            </p>
+        </div>
+    </div>
+
+    <!-- Requirements -->
+    <div class="card section-card shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h2 class="h4 mb-3">
+                <i class="bi bi-check2-square text-success"></i> Requirements
+            </h2>
+            <p>To get started with the Ape Project, you'll need:</p>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <span class="requirement-badge"><i class="bi bi-pc-display me-2"></i>Visual Studio 2022</span>
+                <span class="requirement-badge"><i class="bi bi-gear me-2"></i>.NET 8.0+ SDK</span>
+                <span class="requirement-badge"><i class="bi bi-database me-2"></i>SQL Server (LocalDB or Full)</span>
+                <span class="requirement-badge"><i class="bi bi-git me-2"></i>Git (optional)</span>
+            </div>
+            <p class="text-muted mb-0">
+                <i class="bi bi-info-circle me-1"></i>
+                SQL Server LocalDB is included with Visual Studio and works great for development.
+                For production, we recommend SQL Server Express or higher.
+            </p>
+        </div>
+    </div>
+
+    <!-- Getting Started -->
+    <div class="card section-card shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h2 class="h4 mb-3">
+                <i class="bi bi-rocket-takeoff text-primary"></i> Getting Started
+            </h2>
+            <div class="row g-3">
+                <div class="col-12">
+                    <div class="d-flex align-items-start">
+                        <span class="step-number me-3">1</span>
+                        <div>
+                            <strong>Clone or Download</strong>
+                            <p class="text-muted mb-0">Get the source code from our GitHub repository</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="d-flex align-items-start">
+                        <span class="step-number me-3">2</span>
+                        <div>
+                            <strong>Open in Visual Studio</strong>
+                            <p class="text-muted mb-0">Open the <code>Ape.sln</code> solution file</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="d-flex align-items-start">
+                        <span class="step-number me-3">3</span>
+                        <div>
+                            <strong>Configure Connection String</strong>
+                            <p class="text-muted mb-0">Update <code>appsettings.json</code> with your database connection</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="d-flex align-items-start">
+                        <span class="step-number me-3">4</span>
+                        <div>
+                            <strong>Run Migrations</strong>
+                            <p class="text-muted mb-0">Execute <code>Update-Database</code> in Package Manager Console</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="d-flex align-items-start">
+                        <span class="step-number me-3">5</span>
+                        <div>
+                            <strong>Launch and Explore</strong>
+                            <p class="text-muted mb-0">Press F5 to run—your first Admin account is created automatically!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documentation Links -->
+    <div class="card section-card shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h2 class="h4 mb-3">
+                <i class="bi bi-book text-info"></i> Documentation
+            </h2>
+            <p>Comprehensive guides are available in our GitHub repository:</p>
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <a href="https://github.com/MikishVaughn/Ape/blob/master/README.md" target="_blank" rel="noopener noreferrer" class="doc-link">
+                        <i class="bi bi-file-text me-2"></i>README - Project Overview
+                        <i class="bi bi-arrow-right float-end"></i>
+                    </a>
+                </div>
+                <div class="col-md-6">
+                    <a href="https://github.com/MikishVaughn/Ape/blob/master/INSTALLATION.md" target="_blank" rel="noopener noreferrer" class="doc-link">
+                        <i class="bi bi-download me-2"></i>Installation Guide
+                        <i class="bi bi-arrow-right float-end"></i>
+                    </a>
+                </div>
+                <div class="col-md-6">
+                    <a href="https://github.com/MikishVaughn/Ape/blob/master/CONFIGURATION.md" target="_blank" rel="noopener noreferrer" class="doc-link">
+                        <i class="bi bi-sliders me-2"></i>Configuration Guide
+                        <i class="bi bi-arrow-right float-end"></i>
+                    </a>
+                </div>
+                <div class="col-md-6">
+                    <a href="https://github.com/MikishVaughn/Ape/blob/master/FEATURES.md" target="_blank" rel="noopener noreferrer" class="doc-link">
+                        <i class="bi bi-list-check me-2"></i>Feature Documentation
+                        <i class="bi bi-arrow-right float-end"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <a href="https://github.com/MikishVaughn/Ape" target="_blank" rel="noopener noreferrer" class="btn btn-dark btn-lg">
+                    <i class="bi bi-github me-2"></i>View Full Repository on GitHub
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hosting Services -->
+    <div class="card hosting-card shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h2 class="h4 mb-3">
+                <i class="bi bi-cloud-upload"></i> Hosted Starter Sites
+            </h2>
+            <p>
+                Don't want to deal with server setup? We offer <strong>pre-configured hosted solutions</strong>
+                that let you hit the ground running. We'll set up your Ape-based site on our secure hosting
+                infrastructure, configure your database, SSL certificates, and email services—then hand you
+                the keys to a fully-functional application.
+            </p>
+            <div class="row g-3 mt-2">
+                <div class="col-md-4 text-center">
+                    <i class="bi bi-shield-check tech-stack-icon"></i>
+                    <div><strong>SSL Configured</strong></div>
+                    <small class="text-white-50">Secure HTTPS included</small>
+                </div>
+                <div class="col-md-4 text-center">
+                    <i class="bi bi-database-check tech-stack-icon"></i>
+                    <div><strong>Database Ready</strong></div>
+                    <small class="text-white-50">SQL Server provisioned</small>
+                </div>
+                <div class="col-md-4 text-center">
+                    <i class="bi bi-envelope-check tech-stack-icon"></i>
+                    <div><strong>Email Services</strong></div>
+                    <small class="text-white-50">SMTP pre-configured</small>
+                </div>
+            </div>
+            <p class="mt-3 mb-0 text-white-50">
+                <i class="bi bi-info-circle me-1"></i>
+                Contact us for hosting options and pricing tailored to your needs.
+            </p>
+        </div>
+    </div>
+
+    <!-- Custom Development -->
+    <div class="card custom-dev-card shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h2 class="h4 mb-3">
+                <i class="bi bi-code-slash"></i> Custom Development Services
+            </h2>
+            <p>
+                Need something beyond the standard framework? <strong>The Mikish Group</strong> offers custom
+                development services to extend, modify, or build upon the Ape Project. Whether you need
+                custom integrations, additional features, UI redesigns, or complete bespoke solutions—we're
+                here to help bring your vision to life.
+            </p>
+            <ul class="list-unstyled mb-0">
+                <li class="mb-2"><i class="bi bi-check-lg text-success me-2"></i>Custom feature development</li>
+                <li class="mb-2"><i class="bi bi-check-lg text-success me-2"></i>Third-party API integrations</li>
+                <li class="mb-2"><i class="bi bi-check-lg text-success me-2"></i>UI/UX customization</li>
+                <li class="mb-2"><i class="bi bi-check-lg text-success me-2"></i>Performance optimization</li>
+                <li><i class="bi bi-check-lg text-success me-2"></i>Ongoing support and maintenance</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Contact CTA -->
+    <div class="text-center py-4">
+        <h3 class="h5 mb-3">Ready to get started or have questions?</h3>
+        <a asp-controller="Info" asp-action="Contact" class="btn btn-primary btn-lg me-2">
+            <i class="bi bi-envelope me-2"></i>Contact Us
+        </a>
+        <a href="https://github.com/MikishVaughn/Ape" target="_blank" rel="noopener noreferrer" class="btn btn-outline-dark btn-lg">
+            <i class="bi bi-github me-2"></i>Visit GitHub
+        </a>
+    </div>
+
+    <!-- Footer Note -->
+    <div class="text-center text-muted py-3 border-top mt-4">
+        <small>
+            <i class="bi bi-heart-fill text-danger me-1"></i>
+            Built with passion by <strong>The Mikish Group</strong>
+        </small>
+    </div>
+
+</div>
